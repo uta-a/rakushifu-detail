@@ -8,17 +8,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   const { year, month } = req.query;
-  if (!year || !month) {
-    return res.status(400).json({ error: 'year と month パラメータが必要です' });
+  const y = Number(year);
+  const m = Number(month);
+
+  if (!Number.isInteger(y) || !Number.isInteger(m) || y < 2000 || y > 2100 || m < 1 || m > 12) {
+    return res.status(400).json({ error: '有効な year (2000-2100) と month (1-12) を指定してください' });
   }
 
   const cookies = req.headers['x-rakushifu-cookies'] as string;
-  if (!cookies) {
+  if (!cookies || cookies.length > 10000) {
     return res.status(401).json({ error: 'ログインしてください' });
   }
-
-  const y = Number(year);
-  const m = Number(month);
   const startDate = `${y}-${String(m).padStart(2, '0')}-01`;
   const lastDay = new Date(y, m, 0).getDate();
   const endDate = `${y}-${String(m).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
@@ -44,7 +44,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const data = await response.json();
     return res.status(200).json(data);
   } catch (error) {
-    console.error('Fetch shifts error:', error);
+    console.error('Fetch shifts error');
     return res.status(500).json({ error: 'シフトデータの取得でエラーが発生しました' });
   }
 }

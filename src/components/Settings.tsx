@@ -11,7 +11,17 @@ const defaultSettings: SalarySettings = {
 function loadSettings(): SalarySettings {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      const hourlyRate = Number(parsed?.hourlyRate);
+      const transportCost = Number(parsed?.transportCost);
+      if (
+        Number.isFinite(hourlyRate) && hourlyRate >= 0 &&
+        Number.isFinite(transportCost) && transportCost >= 0
+      ) {
+        return { hourlyRate, transportCost };
+      }
+    }
   } catch {
     // ignore
   }
