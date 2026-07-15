@@ -1,4 +1,5 @@
 import type { ShiftDetail } from '../types/shift';
+import { parseShiftDate } from '../utils/date';
 
 interface ShiftTableProps {
   shifts: ShiftDetail[];
@@ -7,7 +8,7 @@ interface ShiftTableProps {
 const dayOfWeek = ['日', '月', '火', '水', '木', '金', '土'];
 
 function formatDate(dateStr: string): string {
-  const date = new Date(dateStr);
+  const date = parseShiftDate(dateStr);
   const m = date.getMonth() + 1;
   const d = date.getDate();
   const dow = dayOfWeek[date.getDay()];
@@ -22,7 +23,7 @@ function formatHours(hours: number): string {
 }
 
 function getDayColor(dateStr: string): string {
-  const day = new Date(dateStr).getDay();
+  const day = parseShiftDate(dateStr).getDay();
   if (day === 0) return 'text-red-500';
   if (day === 6) return 'text-blue-500';
   return 'text-gray-800';
