@@ -50,7 +50,7 @@ export function MainTabs({ onSessionExpired }: MainTabsProps) {
         {active === 'salary' ? (
           <Dashboard onSessionExpired={onSessionExpired} />
         ) : (
-          <ShiftOverlap />
+          <ShiftOverlap onSessionExpired={onSessionExpired} />
         )}
       </main>
     </div>
