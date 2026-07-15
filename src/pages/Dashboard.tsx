@@ -6,12 +6,16 @@ import { SalarySummary } from '../components/SalarySummary';
 import { calcMonthlySalary } from '../utils/salaryCalculator';
 import type { SalarySettings } from '../types/shift';
 
-export function Dashboard() {
+interface DashboardProps {
+  onSessionExpired: () => void;
+}
+
+export function Dashboard({ onSessionExpired }: DashboardProps) {
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
   const [settings, setSettings] = useState<SalarySettings>({ hourlyRate: 1200, transportCost: 0 });
-  const { schedules, loading, error, fetchShifts } = useShifts();
+  const { schedules, loading, error, fetchShifts } = useShifts(onSessionExpired);
 
   useEffect(() => {
     fetchShifts(year, month);

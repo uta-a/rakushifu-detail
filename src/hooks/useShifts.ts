@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { ShiftApiResponse, Schedule } from '../types/shift';
 
-export function useShifts() {
+export function useShifts(onUnauthorized?: () => void) {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,6 +23,15 @@ export function useShifts() {
           'X-Rakushifu-Cookies': cookies,
         },
       });
+      if (res.status === 401) {
+        // セッション失効。保持している cookie を破棄して再ログインを促す
+        sessionStorage.removeItem('rakushifu-cookies');
+        setSchedules([]);
+        setError('セッションが切れました。再度ログインしてください');
+        setLoading(false);
+        onUnauthorized?.();
+        return;
+      }
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || 'シフトの取得に失敗しました');
@@ -38,7 +47,7 @@ export function useShifts() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [onUnauthorized]);
 
   return { schedules, loading, error, fetchShifts };
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { LoginForm } from './components/LoginForm';
 import { Dashboard } from './pages/Dashboard';
 
@@ -6,6 +6,8 @@ function App() {
   const [loggedIn, setLoggedIn] = useState(
     () => !!sessionStorage.getItem('rakushifu-cookies')
   );
+
+  const handleLogout = useCallback(() => setLoggedIn(false), []);
 
   if (!loggedIn) {
     return (
@@ -15,7 +17,7 @@ function App() {
     );
   }
 
-  return <Dashboard />;
+  return <Dashboard onSessionExpired={handleLogout} />;
 }
 
 export default App;
