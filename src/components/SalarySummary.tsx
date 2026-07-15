@@ -17,7 +17,7 @@ function formatHours(hours: number): string {
 
 export function SalarySummary({ result }: SalarySummaryProps) {
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-6 space-y-4">
+    <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 space-y-4">
       <h2 className="text-lg font-bold text-gray-800">給料見込み</h2>
 
       <div className="grid grid-cols-2 gap-3">

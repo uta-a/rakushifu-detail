@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { LoginForm } from './components/LoginForm';
-import { Dashboard } from './pages/Dashboard';
+import { MainTabs } from './pages/MainTabs';
 
 function App() {
   const [loggedIn, setLoggedIn] = useState(
@@ -17,7 +17,7 @@ function App() {
     );
   }
 
-  return <Dashboard onSessionExpired={handleLogout} />;
+  return <MainTabs onSessionExpired={handleLogout} />;
 }
 
 export default App;

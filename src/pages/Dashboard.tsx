@@ -49,58 +49,53 @@ export function Dashboard({ onSessionExpired }: DashboardProps) {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-3xl mx-auto px-4 py-4">
-          <h1 className="text-xl font-bold text-gray-800">給料計算</h1>
-          <p className="text-xs text-gray-500 mt-1">らくしふ シフトデータから給料を計算</p>
+    <div className="space-y-5 sm:space-y-6">
+      <Settings onChange={handleSettingsChange} />
+
+      <div className="flex items-center justify-center gap-2 sm:gap-4">
+        <button
+          type="button"
+          onClick={handlePrevMonth}
+          aria-label="前の月"
+          className="flex items-center justify-center h-11 w-11 hover:bg-gray-200 rounded-lg transition-colors"
+        >
+          <span className="material-symbols-outlined">chevron_left</span>
+        </button>
+        <h2 className="text-lg font-bold text-gray-800 min-w-32 text-center">
+          {year}年{month}月
+        </h2>
+        <button
+          type="button"
+          onClick={handleNextMonth}
+          aria-label="次の月"
+          className="flex items-center justify-center h-11 w-11 hover:bg-gray-200 rounded-lg transition-colors"
+        >
+          <span className="material-symbols-outlined">chevron_right</span>
+        </button>
+      </div>
+
+      {loading && (
+        <div className="text-center py-8">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent" />
+          <p className="mt-2 text-sm text-gray-500">シフトデータを取得中...</p>
         </div>
-      </header>
+      )}
 
-      <main className="max-w-3xl mx-auto px-4 py-6 space-y-6">
-        <Settings onChange={handleSettingsChange} />
-
-        <div className="flex items-center justify-center gap-4">
-          <button
-            onClick={handlePrevMonth}
-            className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
-          >
-            <span className="material-symbols-outlined">chevron_left</span>
-          </button>
-          <h2 className="text-lg font-bold text-gray-800 min-w-32 text-center">
-            {year}年{month}月
-          </h2>
-          <button
-            onClick={handleNextMonth}
-            className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
-          >
-            <span className="material-symbols-outlined">chevron_right</span>
-          </button>
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
+          {error}
         </div>
+      )}
 
-        {loading && (
-          <div className="text-center py-8">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent" />
-            <p className="mt-2 text-sm text-gray-500">シフトデータを取得中...</p>
+      {!loading && !error && (
+        <>
+          <SalarySummary result={salaryResult} />
+          <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6">
+            <h2 className="text-lg font-bold text-gray-800 mb-4">シフト一覧</h2>
+            <ShiftTable shifts={salaryResult.shifts} />
           </div>
-        )}
-
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
-            {error}
-          </div>
-        )}
-
-        {!loading && !error && (
-          <>
-            <SalarySummary result={salaryResult} />
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h2 className="text-lg font-bold text-gray-800 mb-4">シフト一覧</h2>
-              <ShiftTable shifts={salaryResult.shifts} />
-            </div>
-          </>
-        )}
-      </main>
+        </>
+      )}
     </div>
   );
 }
