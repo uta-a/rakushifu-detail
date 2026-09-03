@@ -17,7 +17,16 @@ npm run test:watch   # Vitest（watch）
 npx vitest run src/utils/salaryCalculator.test.ts   # 単一テストファイル実行
 ```
 
-デプロイは Vercel（`npx vercel`）。`api/` の Serverless Functions を含むため、ローカルで API 込みの動作確認をするには `npx vercel dev` を使う（`npm run dev` はフロントのみで `/api/*` は動かない）。
+デプロイは Vercel（`npx vercel`）。
+
+ローカルで API 込みの動作確認をするには、2つのプロセスを並行して起動する。
+
+```bash
+npx vercel dev --listen 3001   # api/ の Serverless Functions（ポートは固定）
+npm run dev                    # フロント。/api/* は 3001 にプロキシされる
+```
+
+ブラウザで開くのは `npm run dev` 側（既定 5173）。`vercel dev` 単体でフロントも見ようとすると、`vercel.json` の SPA フォールバック（`/((?!api/).*)` → `/index.html`）が Vite の dev アセット（`/src/*`, `/@vite/*`）まで書き換えてしまい、Vite が HTML を JS としてパースしようとして落ちる。本番では Vercel がファイルシステムを rewrites より先に見るためこの問題は起きない。`--listen 3001` は `vite.config.ts` の `server.proxy` の転送先と一致させること。
 
 ## アーキテクチャ
 

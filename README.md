@@ -35,6 +35,14 @@ npm install
 npm run dev
 ```
 
+`npm run dev` はフロントのみ。らくしふへのログインを含む `/api/*` を動かすには、別のターミナルで Serverless Functions を起動する。
+
+```bash
+npx vercel dev --listen 3001
+```
+
+`vite.config.ts` が `/api` をこのポートに転送するため、ブラウザで開くのは `npm run dev` 側（既定 http://localhost:5173 ）。
+
 ## デプロイ
 
 Vercelにデプロイして使用する。
