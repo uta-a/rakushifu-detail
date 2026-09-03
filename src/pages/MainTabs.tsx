@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { ShiftCalendar } from './ShiftCalendar';
 import { Dashboard } from './Dashboard';
 import { ShiftOverlap } from './ShiftOverlap';
 
-type TabKey = 'salary' | 'overlap';
+type TabKey = 'calendar' | 'salary' | 'overlap';
 
 const TABS: { key: TabKey; label: string; icon: string }[] = [
+  { key: 'calendar', label: 'カレンダー', icon: 'calendar_month' },
   { key: 'salary', label: '給料計算', icon: 'payments' },
   { key: 'overlap', label: 'シフトかぶり', icon: 'groups' },
 ];
@@ -14,7 +16,7 @@ interface MainTabsProps {
 }
 
 export function MainTabs({ onSessionExpired }: MainTabsProps) {
-  const [active, setActive] = useState<TabKey>('salary');
+  const [active, setActive] = useState<TabKey>('calendar');
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -31,13 +33,13 @@ export function MainTabs({ onSessionExpired }: MainTabsProps) {
                   role="tab"
                   aria-selected={selected}
                   onClick={() => setActive(tab.key)}
-                  className={`flex-1 flex items-center justify-center gap-1.5 min-h-11 py-3 text-sm font-medium border-b-2 transition-colors ${
+                  className={`flex-1 flex items-center justify-center gap-1 sm:gap-1.5 min-h-11 py-3 text-xs sm:text-sm font-medium border-b-2 transition-colors ${
                     selected
                       ? 'border-blue-600 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700'
                   }`}
                 >
-                  <span className="material-symbols-outlined text-xl">{tab.icon}</span>
+                  <span className="material-symbols-outlined text-lg sm:text-xl">{tab.icon}</span>
                   {tab.label}
                 </button>
               );
@@ -47,11 +49,9 @@ export function MainTabs({ onSessionExpired }: MainTabsProps) {
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-5 sm:py-6">
-        {active === 'salary' ? (
-          <Dashboard onSessionExpired={onSessionExpired} />
-        ) : (
-          <ShiftOverlap onSessionExpired={onSessionExpired} />
-        )}
+        {active === 'calendar' && <ShiftCalendar onSessionExpired={onSessionExpired} />}
+        {active === 'salary' && <Dashboard onSessionExpired={onSessionExpired} />}
+        {active === 'overlap' && <ShiftOverlap onSessionExpired={onSessionExpired} />}
       </main>
     </div>
   );
