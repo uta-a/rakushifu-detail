@@ -138,9 +138,9 @@ export function CalendarGrid({
                       >
                         {cell.day}
                       </span>
-                      <span className="flex h-2 items-center gap-0.5" aria-hidden="true">
+                      <span className="flex h-2.5 items-center gap-0.5" aria-hidden="true">
                         {Array.from({ length: dotCount }, (_, i) => (
-                          <span key={i} className="h-2 w-2 rounded-full bg-gray-300" />
+                          <span key={i} className="h-2.5 w-2.5 rounded-full bg-gray-400" />
                         ))}
                       </span>
                     </button>

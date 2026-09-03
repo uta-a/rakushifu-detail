@@ -56,14 +56,15 @@ export function CalendarDayDetail({ date, shifts, loading }: CalendarDayDetailPr
                   休み
                 </p>
               ) : (
-                <div className="border-l-2 border-emerald-600 pl-3 space-y-3">
+                <div className="space-y-3">
                   <p className="flex items-center gap-2 text-2xl font-semibold text-gray-900">
                     <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white">
                       <span className="material-symbols-outlined text-base">check</span>
                     </span>
                     {detail.startTime} – {detail.endTime}
                   </p>
-                  <div className="space-y-2">
+                  {/* 時刻の下に緑の縦線を通し、その日の内訳をぶら下げる */}
+                  <div className="ml-3 space-y-2 border-l-2 border-emerald-600 pl-4">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">勤務時間</span>
                       <span className="font-medium text-gray-800">{formatHours(detail.totalHours)}</span>
