@@ -101,3 +101,23 @@ export interface OverlapResult {
   floor: OverlapEntry[];
   kitchen: OverlapEntry[];
 }
+
+// --- カレンダー表示 ---
+
+/** カレンダー1セル。月外のセルは date/day ともに null（数字を出さない） */
+export interface CalendarCell {
+  date: string | null;
+  day: number | null;
+}
+
+/** 常に長さ7。index が曜日（0=日 .. 6=土）に一致 */
+export type CalendarWeek = CalendarCell[];
+
+/** 詳細欄で使う、生Schedule と計算済み詳細のペア */
+export interface CalendarShift {
+  schedule: Schedule;
+  detail: ShiftDetail;
+}
+
+/** 日セルに出す印の種類 */
+export type DayMark = 'none' | 'work' | 'off';
