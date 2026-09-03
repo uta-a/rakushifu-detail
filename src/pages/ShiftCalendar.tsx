@@ -45,7 +45,7 @@ export function ShiftCalendar({ onSessionExpired }: ShiftCalendarProps) {
 
   return (
     <div className="space-y-5 sm:space-y-6">
-      <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6" aria-busy={isLoading}>
+      <div className="bg-white rounded-2xl border border-gray-200 p-3 sm:p-4" aria-busy={isLoading}>
         <CalendarGrid
           year={year}
           month={month}

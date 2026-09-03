@@ -22,7 +22,7 @@ const MAX_YEAR = 2100;
 function getWeekdayColor(weekday: number): string {
   if (weekday === 0) return 'text-red-500';
   if (weekday === 6) return 'text-blue-500';
-  return 'text-gray-800';
+  return 'text-gray-700';
 }
 
 function getHeaderColor(weekday: number): string {
@@ -32,9 +32,9 @@ function getHeaderColor(weekday: number): string {
 }
 
 function getCircleClass(isSelected: boolean, isToday: boolean, weekday: number): string {
-  if (isSelected && isToday) return 'bg-blue-600 text-white ring-2 ring-gray-900';
-  if (isSelected) return 'bg-blue-600 text-white';
-  if (isToday) return 'bg-gray-900 text-white';
+  if (isSelected && isToday) return 'bg-blue-500 text-white ring-2 ring-gray-400';
+  if (isSelected) return 'bg-blue-500 text-white';
+  if (isToday) return 'bg-gray-700 text-white';
   return getWeekdayColor(weekday);
 }
 
@@ -72,7 +72,7 @@ export function CalendarGrid({
           onClick={onPrevMonth}
           disabled={prevDisabled}
           aria-label="前の月"
-          className="flex items-center justify-center h-11 w-11 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center justify-center h-11 w-11 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span className="material-symbols-outlined">chevron_left</span>
         </button>
@@ -85,7 +85,7 @@ export function CalendarGrid({
           onClick={onNextMonth}
           disabled={nextDisabled}
           aria-label="次の月"
-          className="flex items-center justify-center h-11 w-11 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center justify-center h-11 w-11 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span className="material-symbols-outlined">chevron_right</span>
         </button>
@@ -96,7 +96,7 @@ export function CalendarGrid({
           {year}年{month}月のシフトカレンダー
         </caption>
         <thead>
-          <tr>
+          <tr className="bg-gray-50">
             {WEEKDAY_LABELS.map((label, weekday) => (
               <th
                 key={label}
@@ -110,7 +110,7 @@ export function CalendarGrid({
         </thead>
         <tbody>
           {weeks.map((week, weekIndex) => (
-            <tr key={weekIndex}>
+            <tr key={weekIndex} className="border-b border-gray-100 last:border-0">
               {week.map((cell, weekday) => {
                 if (cell.date === null || cell.day === null) {
                   return <td key={weekday} className="p-0" />;
@@ -131,18 +131,18 @@ export function CalendarGrid({
                       aria-pressed={isSelected}
                       aria-current={isToday ? 'date' : undefined}
                       aria-label={`${year}年${month}月${cell.day}日 ${WEEKDAY_LABELS[weekday]}曜日${getMarkLabel(mark, workCount)}`}
-                      className="flex h-14 w-full flex-col items-center justify-center gap-1 rounded-lg hover:bg-gray-100 transition-colors"
+                      className="flex h-14 w-full flex-col items-center justify-center gap-1 rounded-lg hover:bg-gray-50 transition-colors"
                     >
                       <span
                         className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${getCircleClass(isSelected, isToday, weekday)}`}
                       >
                         {cell.day}
                       </span>
-                      <span className="flex h-1.5 items-center gap-0.5" aria-hidden="true">
+                      <span className="flex h-2 items-center gap-0.5" aria-hidden="true">
                         {Array.from({ length: dotCount }, (_, i) => (
                           <span
                             key={i}
-                            className={`h-1.5 w-1.5 rounded-full ${mark === 'work' ? 'bg-blue-500' : 'bg-gray-300'}`}
+                            className={`h-2 w-2 rounded-full ${mark === 'work' ? 'bg-gray-300' : 'border border-gray-300'}`}
                           />
                         ))}
                       </span>
