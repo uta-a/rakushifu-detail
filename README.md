@@ -1,4 +1,4 @@
-# skylark-salary-detail
+# rakushifu-detail
 
 すかいらーくグループの「らくしふ」シフト管理サイトから確定シフトデータを取得し、予定通り働いた場合の給料を自動計算するWebアプリ。
 
@@ -28,8 +28,8 @@
 ## セットアップ
 
 ```bash
-git clone https://github.com/uta-a/skylark-salary-detail.git
-cd skylark-salary-detail
+git clone https://github.com/uta-a/rakushifu-detail.git
+cd rakushifu-detail
 npm install
 npm run dev
 ```
