@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { ShiftCalendar } from './ShiftCalendar';
-import { Dashboard } from './Dashboard';
 import { ShiftOverlap } from './ShiftOverlap';
+import { Dashboard } from './Dashboard';
 
-type TabKey = 'calendar' | 'salary' | 'overlap';
+type TabKey = 'calendar' | 'overlap' | 'salary';
 
 const TABS: { key: TabKey; label: string; icon: string }[] = [
   { key: 'calendar', label: 'カレンダー', icon: 'calendar_month' },
-  { key: 'salary', label: '給料計算', icon: 'payments' },
   { key: 'overlap', label: 'シフトかぶり', icon: 'groups' },
+  { key: 'salary', label: '給料計算', icon: 'payments' },
 ];
 
 interface MainTabsProps {
@@ -50,8 +50,8 @@ export function MainTabs({ onSessionExpired }: MainTabsProps) {
 
       <main className="max-w-3xl mx-auto px-4 py-5 sm:py-6">
         {active === 'calendar' && <ShiftCalendar onSessionExpired={onSessionExpired} />}
-        {active === 'salary' && <Dashboard onSessionExpired={onSessionExpired} />}
         {active === 'overlap' && <ShiftOverlap onSessionExpired={onSessionExpired} />}
+        {active === 'salary' && <Dashboard onSessionExpired={onSessionExpired} />}
       </main>
     </div>
   );
