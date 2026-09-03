@@ -32,15 +32,15 @@ function getHeaderColor(weekday: number): string {
 }
 
 function getCircleClass(isSelected: boolean, isToday: boolean, weekday: number): string {
-  if (isSelected && isToday) return 'bg-blue-500 text-white ring-2 ring-gray-400';
+  // 今日と選択日が重なる場合は選択日の青を優先する
   if (isSelected) return 'bg-blue-500 text-white';
   if (isToday) return 'bg-gray-700 text-white';
   return getWeekdayColor(weekday);
 }
 
+/** 印を出すのは勤務シフトがある日のみ。休みの日は数字だけにする */
 function getDotCount(mark: DayMark, workCount: number): number {
   if (mark === 'work') return Math.min(workCount, MAX_DOTS);
-  if (mark === 'off') return 1;
   return 0;
 }
 
@@ -140,10 +140,7 @@ export function CalendarGrid({
                       </span>
                       <span className="flex h-2 items-center gap-0.5" aria-hidden="true">
                         {Array.from({ length: dotCount }, (_, i) => (
-                          <span
-                            key={i}
-                            className={`h-2 w-2 rounded-full ${mark === 'work' ? 'bg-gray-300' : 'border border-gray-300'}`}
-                          />
+                          <span key={i} className="h-2 w-2 rounded-full bg-gray-300" />
                         ))}
                       </span>
                     </button>
