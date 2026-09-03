@@ -34,3 +34,8 @@ Thumbs.db
 
 .vercel
 .env*.local
+
+# Playwright MCP の作業ディレクトリと、ルート直下に吐かれる検証用スクリーンショット
+# （READMEで使う docs/*.png は対象外）
+.playwright-mcp/
+/*.png
