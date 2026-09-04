@@ -1,5 +1,6 @@
 import type { ShiftDetail } from '../types/shift';
 import { parseShiftDate } from '../utils/date';
+import { cn } from '../lib/cn';
 
 interface ShiftTableProps {
   shifts: ShiftDetail[];
@@ -22,56 +23,77 @@ function formatHours(hours: number): string {
   return `${h}h${m}m`;
 }
 
+/** 曜日色は日・土のみ。それ以外は前面色に揃える */
 function getDayColor(dateStr: string): string {
   const day = parseShiftDate(dateStr).getDay();
-  if (day === 0) return 'text-red-500';
-  if (day === 6) return 'text-blue-500';
-  return 'text-gray-800';
+  if (day === 0) return 'text-sunday';
+  if (day === 6) return 'text-saturday';
+  return 'text-foreground';
+}
+
+/** 空欄。記号は読み上げから外し、代わりに「なし」を読ませる */
+function Blank() {
+  return (
+    <>
+      <span className="text-muted-foreground font-normal" aria-hidden="true">
+        –
+      </span>
+      <span className="sr-only">なし</span>
+    </>
+  );
 }
 
 export function ShiftTable({ shifts }: ShiftTableProps) {
   if (shifts.length === 0) {
-    return <p className="text-gray-500 text-center py-8">シフトデータがありません</p>;
+    return (
+      <p className="text-muted-foreground py-8 text-center text-sm">シフトデータがありません</p>
+    );
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm whitespace-nowrap">
+    <div className="-mx-4 overflow-x-auto sm:-mx-6">
+      <table className="tabular w-full min-w-[22rem] text-sm whitespace-nowrap">
         <thead>
-          <tr className="border-b-2 border-gray-200">
-            <th className="py-2 px-2 sm:px-3 text-left font-medium text-gray-600">日付</th>
-            <th className="py-2 px-2 sm:px-3 text-left font-medium text-gray-600">時間</th>
-            <th className="py-2 px-2 sm:px-3 text-right font-medium text-gray-600">勤務</th>
-            <th className="py-2 px-2 sm:px-3 text-right font-medium text-gray-600">通常</th>
-            <th className="py-2 px-2 sm:px-3 text-right font-medium text-gray-600">深夜</th>
+          <tr className="border-b">
+            <th className="text-muted-foreground px-4 py-2 text-left font-medium sm:px-6">日付</th>
+            <th className="text-muted-foreground px-2 py-2 text-left font-medium">時間</th>
+            <th className="text-muted-foreground px-2 py-2 text-right font-medium">勤務</th>
+            <th className="text-muted-foreground px-2 py-2 text-right font-medium">通常</th>
+            <th className="text-muted-foreground px-4 py-2 text-right font-medium sm:px-6">深夜</th>
           </tr>
         </thead>
         <tbody>
           {shifts.map((shift) => (
             <tr
               key={shift.date}
-              className={`border-b border-gray-100 ${shift.isOff ? 'bg-gray-50 opacity-60' : 'hover:bg-blue-50'}`}
+              className={cn(
+                'border-b last:border-0',
+                shift.isOff ? 'bg-muted/40' : 'hover:bg-muted/50 transition-colors duration-150'
+              )}
             >
-              <td className={`py-2 px-2 sm:px-3 font-medium ${getDayColor(shift.date)}`}>
+              <td
+                className={cn(
+                  'px-4 py-2.5 font-medium sm:px-6',
+                  shift.isOff ? 'text-muted-foreground' : getDayColor(shift.date)
+                )}
+              >
                 {formatDate(shift.date)}
               </td>
-              <td className="py-2 px-2 sm:px-3 text-gray-700">
-                {shift.isOff ? (
-                  <span className="text-gray-400">休み</span>
+              <td className="text-muted-foreground px-2 py-2.5">
+                {shift.isOff ? '休み' : `${shift.startTime} – ${shift.endTime}`}
+              </td>
+              <td className="px-2 py-2.5 text-right">
+                {shift.isOff ? <Blank /> : formatHours(shift.totalHours)}
+              </td>
+              <td className="px-2 py-2.5 text-right">
+                {shift.isOff ? <Blank /> : formatHours(shift.normalHours)}
+              </td>
+              <td className="px-4 py-2.5 text-right font-medium sm:px-6">
+                {shift.isOff || shift.lateNightHours === 0 ? (
+                  <Blank />
                 ) : (
-                  `${shift.startTime} - ${shift.endTime}`
+                  formatHours(shift.lateNightHours)
                 )}
-              </td>
-              <td className="py-2 px-2 sm:px-3 text-right text-gray-700">
-                {shift.isOff ? '-' : formatHours(shift.totalHours)}
-              </td>
-              <td className="py-2 px-2 sm:px-3 text-right text-gray-700">
-                {shift.isOff ? '-' : formatHours(shift.normalHours)}
-              </td>
-              <td className="py-2 px-2 sm:px-3 text-right text-purple-600 font-medium">
-                {shift.isOff || shift.lateNightHours === 0
-                  ? '-'
-                  : formatHours(shift.lateNightHours)}
               </td>
             </tr>
           ))}

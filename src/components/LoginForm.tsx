@@ -1,4 +1,11 @@
 import { useState } from 'react';
+import { AlertCircle, Loader2 } from 'lucide-react';
+import { Button } from './ui/button';
+import { Card, CardContent } from './ui/card';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Alert, AlertDescription } from './ui/alert';
+import { ThemeToggle } from './ThemeToggle';
 
 interface LoginFormProps {
   onLoginSuccess: () => void;
@@ -37,48 +44,66 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-8 bg-white rounded-2xl shadow-lg">
-      <h1 className="text-2xl font-bold text-center mb-6 text-gray-800">
-        らくしふ ログイン
-      </h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="employeeId" className="block text-sm font-medium text-gray-700 mb-1">
-            従業員ID
-          </label>
-          <input
-            id="employeeId"
-            type="text"
-            value={employeeId}
-            onChange={(e) => setEmployeeId(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-            required
-          />
+    <div className="mx-auto flex min-h-screen w-full max-w-sm flex-col justify-center gap-6 px-4 py-10">
+      <div className="flex items-start justify-between gap-3">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-semibold tracking-tight">らくしふツール</h1>
+          <p className="text-muted-foreground text-sm">
+            従業員IDとパスワードでシフトを取得します
+          </p>
         </div>
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-            パスワード
-          </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-            required
-          />
-        </div>
-        {error && (
-          <p className="text-red-500 text-sm">{error}</p>
-        )}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          {loading ? 'ログイン中...' : 'ログイン'}
-        </button>
-      </form>
+        <ThemeToggle />
+      </div>
+
+      <Card>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="employeeId">従業員ID</Label>
+              <Input
+                id="employeeId"
+                type="text"
+                autoComplete="username"
+                value={employeeId}
+                onChange={(e) => setEmployeeId(e.target.value)}
+                aria-invalid={!!error || undefined}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">パスワード</Label>
+              <Input
+                id="password"
+                type="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                aria-invalid={!!error || undefined}
+                required
+              />
+            </div>
+
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle aria-hidden="true" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            <Button type="submit" disabled={loading} className="w-full">
+              {loading && <Loader2 className="animate-spin" aria-hidden="true" />}
+              {loading ? 'ログイン中...' : 'ログイン'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* autoComplete を付けているので、保存しないのが「このツール」であることを明示する。
+          ブラウザのパスワードマネージャによる保存は別で、こちらでは制御できない */}
+      <p className="text-muted-foreground text-center text-xs">
+        このツールは認証情報を保存しません（ブラウザの保存機能は別です）。
+        取得したセッションはタブを閉じると破棄されます。
+      </p>
     </div>
   );
 }

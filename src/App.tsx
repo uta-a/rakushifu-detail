@@ -11,7 +11,7 @@ function App() {
 
   if (!loggedIn) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="bg-background min-h-screen">
         <LoginForm onLoginSuccess={() => setLoggedIn(true)} />
       </div>
     );

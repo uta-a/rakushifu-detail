@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
+import { Settings2 } from 'lucide-react';
 import type { SalarySettings } from '../types/shift';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Popover } from './ui/popover';
 
 const STORAGE_KEY = 'salary-settings';
 
@@ -28,6 +33,12 @@ function loadSettings(): SalarySettings {
   return defaultSettings;
 }
 
+/** 空文字・負値・NaN を 0 に丸める。min="0" は form 送信時しか効かないため */
+function toAmount(value: string): number {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
 interface SettingsProps {
   onChange: (settings: SalarySettings) => void;
 }
@@ -46,60 +57,55 @@ export function Settings({ onChange }: SettingsProps) {
   };
 
   return (
-    <div className="mb-4">
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-gray-700"
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+      <Popover
+        open={open}
+        onOpenChange={setOpen}
+        label="給与設定" 
+        trigger={
+          <Button variant="outline" size="sm">
+            <Settings2 aria-hidden="true" />
+            給与設定
+          </Button>
+        }
       >
-        <span className="material-symbols-outlined text-lg">settings</span>
-        給与設定
-        <span className="text-xs text-gray-500">
-          ({settings.hourlyRate}円/h, 交通費{settings.transportCost}円/日)
-        </span>
-      </button>
-
-      {open && (
-        <div className="mt-2 p-4 bg-white rounded-xl shadow-lg border border-gray-200 max-w-sm">
-          <div className="space-y-3">
-            <div>
-              <label htmlFor="hourlyRate" className="block text-sm font-medium text-gray-700 mb-1">
-                時給 (円)
-              </label>
-              <input
-                id="hourlyRate"
-                type="number"
-                min="0"
-                value={settings.hourlyRate}
-                onChange={(e) =>
-                  setSettings((s) => ({ ...s, hourlyRate: Number(e.target.value) }))
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-              />
-            </div>
-            <div>
-              <label htmlFor="transportCost" className="block text-sm font-medium text-gray-700 mb-1">
-                交通費 (円/日)
-              </label>
-              <input
-                id="transportCost"
-                type="number"
-                min="0"
-                value={settings.transportCost}
-                onChange={(e) =>
-                  setSettings((s) => ({ ...s, transportCost: Number(e.target.value) }))
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-              />
-            </div>
-            <button
-              onClick={handleSave}
-              className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
-            >
-              保存
-            </button>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="hourlyRate">時給（円）</Label>
+            <Input
+              id="hourlyRate"
+              type="number"
+              inputMode="numeric"
+              min="0"
+              className="tabular"
+              value={settings.hourlyRate}
+              onChange={(e) => setSettings((s) => ({ ...s, hourlyRate: toAmount(e.target.value) }))}
+            />
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="transportCost">交通費（円/日）</Label>
+            <Input
+              id="transportCost"
+              type="number"
+              inputMode="numeric"
+              min="0"
+              className="tabular"
+              value={settings.transportCost}
+              onChange={(e) =>
+                setSettings((s) => ({ ...s, transportCost: toAmount(e.target.value) }))
+              }
+            />
+          </div>
+          <Button onClick={handleSave} size="sm" className="w-full">
+            保存
+          </Button>
         </div>
-      )}
+      </Popover>
+
+      <p className="text-muted-foreground tabular text-xs">
+        時給 {settings.hourlyRate.toLocaleString('ja-JP')}円 ・ 交通費{' '}
+        {settings.transportCost.toLocaleString('ja-JP')}円/日
+      </p>
     </div>
   );
 }

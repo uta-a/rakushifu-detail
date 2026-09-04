@@ -1,14 +1,19 @@
 import { useState } from 'react';
+import { CalendarDays, Users, Wallet } from 'lucide-react';
 import { ShiftCalendar } from './ShiftCalendar';
 import { ShiftOverlap } from './ShiftOverlap';
 import { Dashboard } from './Dashboard';
+import { ThemeToggle } from '../components/ThemeToggle';
+import { TabPanel, Tabs, type TabItem } from '../components/ui/tabs';
 
 type TabKey = 'calendar' | 'overlap' | 'salary';
 
-const TABS: { key: TabKey; label: string; icon: string }[] = [
-  { key: 'calendar', label: 'カレンダー', icon: 'calendar_month' },
-  { key: 'overlap', label: 'シフトかぶり', icon: 'groups' },
-  { key: 'salary', label: '給料計算', icon: 'payments' },
+const TAB_PREFIX = 'main';
+
+const TABS: TabItem<TabKey>[] = [
+  { value: 'calendar', label: 'カレンダー', icon: <CalendarDays aria-hidden="true" /> },
+  { value: 'overlap', label: 'シフトかぶり', icon: <Users aria-hidden="true" /> },
+  { value: 'salary', label: '給料計算', icon: <Wallet aria-hidden="true" /> },
 ];
 
 interface MainTabsProps {
@@ -19,39 +24,29 @@ export function MainTabs({ onSessionExpired }: MainTabsProps) {
   const [active, setActive] = useState<TabKey>('calendar');
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-3xl mx-auto px-4 pt-4">
-          <h1 className="text-lg sm:text-xl font-bold text-gray-800">らくしふツール</h1>
-          <div className="flex mt-3" role="tablist" aria-label="機能切り替え">
-            {TABS.map((tab) => {
-              const selected = active === tab.key;
-              return (
-                <button
-                  key={tab.key}
-                  type="button"
-                  role="tab"
-                  aria-selected={selected}
-                  onClick={() => setActive(tab.key)}
-                  className={`flex-1 flex items-center justify-center gap-1 sm:gap-1.5 min-h-11 py-3 text-xs sm:text-sm font-medium border-b-2 transition-colors ${
-                    selected
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-lg sm:text-xl">{tab.icon}</span>
-                  {tab.label}
-                </button>
-              );
-            })}
+    <div className="bg-background min-h-screen">
+      <header className="bg-background/80 sticky top-0 z-10 border-b backdrop-blur">
+        <div className="mx-auto max-w-3xl px-4 pt-3 pb-2">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <h1 className="text-base font-semibold tracking-tight">らくしふツール</h1>
+            <ThemeToggle />
           </div>
+          <Tabs
+            items={TABS}
+            value={active}
+            onValueChange={setActive}
+            idPrefix={TAB_PREFIX}
+            label="機能切り替え"
+          />
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 py-5 sm:py-6">
-        {active === 'calendar' && <ShiftCalendar onSessionExpired={onSessionExpired} />}
-        {active === 'overlap' && <ShiftOverlap onSessionExpired={onSessionExpired} />}
-        {active === 'salary' && <Dashboard onSessionExpired={onSessionExpired} />}
+      <main className="mx-auto max-w-3xl px-4 py-5 sm:py-6">
+        <TabPanel idPrefix={TAB_PREFIX} value={active}>
+          {active === 'calendar' && <ShiftCalendar onSessionExpired={onSessionExpired} />}
+          {active === 'overlap' && <ShiftOverlap onSessionExpired={onSessionExpired} />}
+          {active === 'salary' && <Dashboard onSessionExpired={onSessionExpired} />}
+        </TabPanel>
       </main>
     </div>
   );

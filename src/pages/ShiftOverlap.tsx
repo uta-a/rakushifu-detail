@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react';
+import { AlertCircle, CalendarOff, ChefHat, UtensilsCrossed } from 'lucide-react';
 import { useOverlap } from '../hooks/useOverlap';
 import type { OverlapEntry } from '../types/shift';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Alert, AlertDescription } from '../components/ui/alert';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Badge } from '../components/ui/badge';
+import { Skeleton, SkeletonGroup } from '../components/ui/skeleton';
 
 function todayString(): string {
   const d = new Date();
@@ -16,39 +23,66 @@ function formatMin(min: number): string {
 
 interface OverlapSectionProps {
   title: string;
-  icon: string;
-  accent: string;
+  icon: React.ReactNode;
   entries: OverlapEntry[];
 }
 
-function OverlapSection({ title, icon, accent, entries }: OverlapSectionProps) {
+/** フロア／キッチンの区別は色ではなくアイコンと見出しで持たせる */
+function OverlapSection({ title, icon, entries }: OverlapSectionProps) {
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6">
-      <h3 className="flex items-center gap-2 text-base font-bold text-gray-800 mb-3">
-        <span className={`material-symbols-outlined ${accent}`}>{icon}</span>
-        {title}
-        <span className="text-sm font-normal text-gray-400">{entries.length}人</span>
-      </h3>
-      {entries.length === 0 ? (
-        <p className="text-sm text-gray-400 py-2">かぶっている人はいません</p>
-      ) : (
-        <ul className="divide-y divide-gray-100">
-          {entries.map((e, i) => (
-            <li key={`${e.name}-${i}`} className="flex items-center justify-between gap-3 py-2.5">
-              <span className="font-medium text-gray-800 truncate">{e.name}</span>
-              <span className="flex flex-col items-end text-right shrink-0">
-                <span className="text-sm text-gray-600">
-                  {formatMin(e.startAsMin)}–{formatMin(e.endAsMin)}
+    <Card>
+      <CardHeader>
+        <span className="text-muted-foreground [&>svg]:size-4" aria-hidden="true">
+          {icon}
+        </span>
+        <CardTitle as="h3" className="text-foreground">
+          {title}
+        </CardTitle>
+        <Badge variant="secondary" className="tabular ml-auto">
+          {entries.length}人
+        </Badge>
+      </CardHeader>
+      <CardContent padding="below-header">
+        {entries.length === 0 ? (
+          <p className="text-muted-foreground py-2 text-sm">かぶっている人はいません</p>
+        ) : (
+          <ul className="divide-y">
+            {entries.map((e, i) => (
+              <li
+                key={`${e.name}-${i}`}
+                className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0"
+              >
+                <span className="truncate text-sm font-medium">{e.name}</span>
+                <span className="tabular flex shrink-0 flex-col items-end text-right">
+                  <span className="text-sm">
+                    {formatMin(e.startAsMin)}–{formatMin(e.endAsMin)}
+                  </span>
+                  <span className="text-muted-foreground text-xs">
+                    かぶり {formatMin(e.overlapStartAsMin)}–{formatMin(e.overlapEndAsMin)}
+                  </span>
                 </span>
-                <span className={`text-xs ${accent}`}>
-                  かぶり {formatMin(e.overlapStartAsMin)}–{formatMin(e.overlapEndAsMin)}
-                </span>
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function OverlapSkeleton() {
+  return (
+    <SkeletonGroup label="シフトを取得中" className="space-y-5">
+      {[0, 1].map((i) => (
+        <Card key={i}>
+          <CardContent className="space-y-3">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-5 w-full" />
+            <Skeleton className="h-5 w-full" />
+          </CardContent>
+        </Card>
+      ))}
+    </SkeletonGroup>
   );
 }
 
@@ -65,52 +99,56 @@ export function ShiftOverlap({ onSessionExpired }: ShiftOverlapProps) {
   }, [date, fetchOverlap]);
 
   return (
-    <div className="space-y-5 sm:space-y-6">
-      <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6">
-        <label htmlFor="overlap-date" className="block text-sm font-medium text-gray-700 mb-2">
-          日付を選択
-        </label>
-        <input
-          id="overlap-date"
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="w-full h-11 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-        />
-        {result?.self && (
-          <p className="mt-3 text-sm text-gray-600">
-            自分のシフト:{' '}
-            <span className="font-medium text-gray-800">
-              {formatMin(result.self.startAsMin)}–{formatMin(result.self.endAsMin)}
-            </span>
-          </p>
-        )}
-      </div>
-
-      {loading && (
-        <div className="text-center py-8">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent" />
-          <p className="mt-2 text-sm text-gray-500">シフトを取得中...</p>
-        </div>
-      )}
+    <div className="space-y-5">
+      <Card>
+        <CardContent className="space-y-3">
+          <div className="space-y-2">
+            <Label htmlFor="overlap-date">日付を選択</Label>
+            <Input
+              id="overlap-date"
+              type="date"
+              className="tabular"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+          </div>
+          {result?.self && (
+            <p className="text-muted-foreground text-sm">
+              自分のシフト{' '}
+              <span className="tabular text-foreground font-medium">
+                {formatMin(result.self.startAsMin)}–{formatMin(result.self.endAsMin)}
+              </span>
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
-          {error}
-        </div>
+        <Alert variant="destructive">
+          <AlertCircle aria-hidden="true" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
+      {loading && !error && <OverlapSkeleton />}
+
       {!loading && !error && result && !result.self && (
-        <div className="bg-white rounded-2xl shadow-lg p-6 sm:p-8 text-center space-y-2">
-          <span className="material-symbols-outlined text-4xl text-gray-300">event_busy</span>
-          <p className="text-sm text-gray-500">この日は自分のシフトがありません</p>
-        </div>
+        <Card>
+          <CardContent className="flex min-h-32 flex-col items-center justify-center gap-2 text-center">
+            <CalendarOff className="text-muted-foreground size-6" aria-hidden="true" />
+            <p className="text-muted-foreground text-sm">この日は自分のシフトがありません</p>
+          </CardContent>
+        </Card>
       )}
 
       {!loading && !error && result?.self && (
         <>
-          <OverlapSection title="フロア" icon="restaurant" accent="text-blue-600" entries={result.floor} />
-          <OverlapSection title="キッチン" icon="skillet" accent="text-orange-600" entries={result.kitchen} />
+          <OverlapSection
+            title="フロア"
+            icon={<UtensilsCrossed />}
+            entries={result.floor}
+          />
+          <OverlapSection title="キッチン" icon={<ChefHat />} entries={result.kitchen} />
         </>
       )}
     </div>

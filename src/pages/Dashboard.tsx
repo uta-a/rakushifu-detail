@@ -1,13 +1,50 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { AlertCircle } from 'lucide-react';
 import { useShifts } from '../hooks/useShifts';
 import { Settings } from '../components/Settings';
 import { ShiftTable } from '../components/ShiftTable';
 import { SalarySummary } from '../components/SalarySummary';
+import { MonthNav } from '../components/MonthNav';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Alert, AlertDescription } from '../components/ui/alert';
+import { Skeleton, SkeletonGroup } from '../components/ui/skeleton';
 import { calcMonthlySalary } from '../utils/salaryCalculator';
 import type { SalarySettings } from '../types/shift';
 
 interface DashboardProps {
   onSessionExpired: () => void;
+}
+
+/** 取得中も高さを保ち、画面が跳ねないようにする */
+function SalarySkeleton() {
+  return (
+    <SkeletonGroup label="シフトデータを取得中" className="space-y-5">
+      <Card>
+        <CardContent className="space-y-5">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-10 w-44" />
+          </div>
+          <Skeleton className="h-[4.5rem] w-full" />
+          <div className="space-y-3 border-t pt-4">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>シフト一覧</CardTitle>
+        </CardHeader>
+        <CardContent padding="below-header" className="space-y-2.5">
+          {Array.from({ length: 6 }, (_, i) => (
+            <Skeleton key={i} className="h-6 w-full" />
+          ))}
+        </CardContent>
+      </Card>
+    </SkeletonGroup>
+  );
 }
 
 export function Dashboard({ onSessionExpired }: DashboardProps) {
@@ -49,51 +86,31 @@ export function Dashboard({ onSessionExpired }: DashboardProps) {
   );
 
   return (
-    <div className="space-y-5 sm:space-y-6">
+    <div className="space-y-5">
       <Settings onChange={handleSettingsChange} />
 
-      <div className="flex items-center justify-center gap-2 sm:gap-4">
-        <button
-          type="button"
-          onClick={handlePrevMonth}
-          aria-label="前の月"
-          className="flex items-center justify-center h-11 w-11 hover:bg-gray-200 rounded-lg transition-colors"
-        >
-          <span className="material-symbols-outlined">chevron_left</span>
-        </button>
-        <h2 className="text-lg font-bold text-gray-800 min-w-32 text-center">
-          {year}年{month}月
-        </h2>
-        <button
-          type="button"
-          onClick={handleNextMonth}
-          aria-label="次の月"
-          className="flex items-center justify-center h-11 w-11 hover:bg-gray-200 rounded-lg transition-colors"
-        >
-          <span className="material-symbols-outlined">chevron_right</span>
-        </button>
-      </div>
-
-      {loading && (
-        <div className="text-center py-8">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent" />
-          <p className="mt-2 text-sm text-gray-500">シフトデータを取得中...</p>
-        </div>
-      )}
+      <MonthNav as="h2" year={year} month={month} onPrev={handlePrevMonth} onNext={handleNextMonth} />
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
-          {error}
-        </div>
+        <Alert variant="destructive">
+          <AlertCircle aria-hidden="true" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
+
+      {loading && !error && <SalarySkeleton />}
 
       {!loading && !error && (
         <>
           <SalarySummary result={salaryResult} />
-          <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6">
-            <h2 className="text-lg font-bold text-gray-800 mb-4">シフト一覧</h2>
-            <ShiftTable shifts={salaryResult.shifts} />
-          </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>シフト一覧</CardTitle>
+            </CardHeader>
+            <CardContent padding="below-header">
+              <ShiftTable shifts={salaryResult.shifts} />
+            </CardContent>
+          </Card>
         </>
       )}
     </div>

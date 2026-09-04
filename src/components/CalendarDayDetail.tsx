@@ -1,5 +1,9 @@
+import { CalendarOff, Moon, StickyNote } from 'lucide-react';
 import type { CalendarShift } from '../types/shift';
 import { formatMonthDayWithWeekday } from '../utils/calendar';
+import { Card, CardContent } from './ui/card';
+import { Skeleton, SkeletonGroup } from './ui/skeleton';
+import { Badge } from './ui/badge';
 
 interface CalendarDayDetailProps {
   date: string;
@@ -17,82 +21,104 @@ function formatHours(hours: number): string {
   return `${h}時間${m}分`;
 }
 
+/** 内訳1行 */
+function DetailRow({ label, value }: { label: React.ReactNode; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3 text-sm">
+      <dt className="text-muted-foreground flex items-center gap-1.5">{label}</dt>
+      <dd className="tabular font-medium">{value}</dd>
+    </div>
+  );
+}
+
+/** 中身が無いときの共通の枠。取得中と「シフトなし」で高さを揃える */
+function EmptyCard({ children }: { children: React.ReactNode }) {
+  return (
+    <Card>
+      <CardContent className="flex min-h-32 flex-col items-center justify-center gap-2 text-center">
+        {children}
+      </CardContent>
+    </Card>
+  );
+}
+
 export function CalendarDayDetail({ date, shifts, loading }: CalendarDayDetailProps) {
   return (
     <>
-      <h2
-        id={CALENDAR_DAY_DETAIL_HEADING_ID}
-        className="rounded-xl bg-gray-50 px-4 py-3 text-base font-semibold text-gray-800"
-      >
+      <h2 id={CALENDAR_DAY_DETAIL_HEADING_ID} className="text-base font-semibold tracking-tight">
         {formatMonthDayWithWeekday(date)}
       </h2>
 
       {/* 取得中は「シフトなし」を出さない（前月のデータでちらつかせない） */}
       {loading && (
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 text-center space-y-2">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-transparent" />
-          <p className="text-sm text-gray-500">シフトデータを取得中...</p>
-        </div>
+        <Card>
+          <CardContent>
+            <SkeletonGroup label="シフトデータを取得中" className="min-h-32 space-y-3">
+              <Skeleton className="h-8 w-40" />
+              <div className="space-y-2 pl-4">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+              </div>
+            </SkeletonGroup>
+          </CardContent>
+        </Card>
       )}
 
       {!loading && shifts.length === 0 && (
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 text-center space-y-2">
-          <span className="material-symbols-outlined text-4xl text-gray-300">event_busy</span>
-          <p className="text-sm text-gray-500">シフトなし</p>
-        </div>
+        <EmptyCard>
+          <CalendarOff className="text-muted-foreground size-6" aria-hidden="true" />
+          <p className="text-muted-foreground text-sm">この日のシフトはありません</p>
+        </EmptyCard>
       )}
 
       {!loading &&
         shifts.map(({ schedule, detail }, index) => {
           const memo = schedule.memo_text?.trim();
           return (
-            <div
-              key={`${schedule.id}-${index}`}
-              className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6 space-y-3"
-            >
-              {detail.isOff ? (
-                <p className="flex items-center gap-2 text-base font-bold text-gray-500">
-                  <span className="material-symbols-outlined text-gray-400">bedtime</span>
-                  休み
-                </p>
-              ) : (
-                <div className="space-y-3">
-                  <p className="flex items-center gap-2 text-2xl font-semibold text-gray-900">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white">
-                      <span className="material-symbols-outlined text-base">check</span>
-                    </span>
-                    {detail.startTime} – {detail.endTime}
+            <Card key={`${schedule.id}-${index}`}>
+              <CardContent className="space-y-4">
+                {detail.isOff ? (
+                  <p className="text-muted-foreground flex items-center gap-2 text-base font-medium">
+                    <Moon className="size-4" aria-hidden="true" />
+                    休み
                   </p>
-                  {/* 時刻の下に緑の縦線を通し、その日の内訳をぶら下げる */}
-                  <div className="ml-3 space-y-2 border-l-2 border-emerald-600 pl-4">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">勤務時間</span>
-                      <span className="font-medium text-gray-800">{formatHours(detail.totalHours)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">通常</span>
-                      <span className="font-medium text-gray-800">{formatHours(detail.normalHours)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="flex items-center gap-1 text-gray-600">
-                        <span className="material-symbols-outlined text-base text-gray-400">bedtime</span>
-                        深夜
-                      </span>
-                      <span className="font-medium text-gray-800">
-                        {detail.lateNightHours === 0 ? '-' : formatHours(detail.lateNightHours)}
-                      </span>
-                    </div>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="tabular text-2xl font-semibold tracking-tight">
+                      {detail.startTime} <span className="text-muted-foreground">–</span>{' '}
+                      {detail.endTime}
+                    </p>
+                    {/* 時刻の下に縦線を通し、その日の内訳をぶら下げる */}
+                    <dl className="ml-1 space-y-2 border-l pl-4">
+                      <DetailRow label="勤務時間" value={formatHours(detail.totalHours)} />
+                      <DetailRow label="通常" value={formatHours(detail.normalHours)} />
+                      <DetailRow
+                        label={
+                          <>
+                            <Moon className="size-3.5" aria-hidden="true" />
+                            深夜
+                            {detail.lateNightHours > 0 && (
+                              <Badge variant="outline">×1.25</Badge>
+                            )}
+                          </>
+                        }
+                        value={
+                          detail.lateNightHours === 0 ? 'なし' : formatHours(detail.lateNightHours)
+                        }
+                      />
+                    </dl>
                   </div>
-                </div>
-              )}
+                )}
 
-              {memo && (
-                <p className="flex items-start gap-2 border-t border-gray-100 pt-3 text-sm text-gray-600">
-                  <span className="material-symbols-outlined text-base text-gray-400">sticky_note_2</span>
-                  {memo}
-                </p>
-              )}
-            </div>
+                {memo && (
+                  <p className="text-muted-foreground flex items-start gap-2 border-t pt-3 text-sm">
+                    <StickyNote className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                    {memo}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
           );
         })}
     </>

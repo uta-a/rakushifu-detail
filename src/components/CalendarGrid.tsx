@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import type { CalendarShift, DayMark } from '../types/shift';
 import { buildMonthGrid, getDayMark, shiftMonth, WEEKDAY_LABELS } from '../utils/calendar';
+import { MonthNav } from './MonthNav';
+import { cn } from '../lib/cn';
 
 interface CalendarGridProps {
   year: number;
@@ -19,22 +21,23 @@ const MAX_DOTS = 3;
 const MIN_YEAR = 2000;
 const MAX_YEAR = 2100;
 
+/** 曜日色は日・土のみ。それ以外は前面色に揃える */
 function getWeekdayColor(weekday: number): string {
-  if (weekday === 0) return 'text-red-500';
-  if (weekday === 6) return 'text-blue-500';
-  return 'text-gray-700';
+  if (weekday === 0) return 'text-sunday';
+  if (weekday === 6) return 'text-saturday';
+  return 'text-foreground';
 }
 
 function getHeaderColor(weekday: number): string {
-  if (weekday === 0) return 'text-red-500';
-  if (weekday === 6) return 'text-blue-500';
-  return 'text-gray-500';
+  if (weekday === 0) return 'text-sunday';
+  if (weekday === 6) return 'text-saturday';
+  return 'text-muted-foreground';
 }
 
 function getCircleClass(isSelected: boolean, isToday: boolean, weekday: number): string {
-  // 今日と選択日が重なる場合は選択日の青を優先する
-  if (isSelected) return 'bg-blue-500 text-white';
-  if (isToday) return 'bg-gray-700 text-white';
+  // 選択日は塗り、今日は輪郭。両方が重なる日は塗りを優先する
+  if (isSelected) return 'bg-primary text-primary-foreground font-semibold';
+  if (isToday) return cn('ring-1 ring-foreground/40 font-semibold', getWeekdayColor(weekday));
   return getWeekdayColor(weekday);
 }
 
@@ -65,43 +68,27 @@ export function CalendarGrid({
   const nextDisabled = shiftMonth(year, month, 1).year > MAX_YEAR;
 
   return (
-    <div>
-      <div className="flex items-center justify-center gap-2 sm:gap-4 mb-2">
-        <button
-          type="button"
-          onClick={onPrevMonth}
-          disabled={prevDisabled}
-          aria-label="前の月"
-          className="flex items-center justify-center h-11 w-11 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <span className="material-symbols-outlined">chevron_left</span>
-        </button>
-        <div className="min-w-32 text-center">
-          <p className="text-xs text-gray-500">{year}年</p>
-          <p className="text-2xl font-bold text-gray-800 leading-tight">{month}月</p>
-        </div>
-        <button
-          type="button"
-          onClick={onNextMonth}
-          disabled={nextDisabled}
-          aria-label="次の月"
-          className="flex items-center justify-center h-11 w-11 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <span className="material-symbols-outlined">chevron_right</span>
-        </button>
-      </div>
+    <div className="space-y-1">
+      <MonthNav
+        year={year}
+        month={month}
+        onPrev={onPrevMonth}
+        onNext={onNextMonth}
+        prevDisabled={prevDisabled}
+        nextDisabled={nextDisabled}
+      />
 
-      <table className="w-full table-fixed">
+      <table className="tabular w-full table-fixed">
         <caption className="sr-only">
           {year}年{month}月のシフトカレンダー
         </caption>
         <thead>
-          <tr className="bg-gray-50">
+          <tr className="border-b">
             {WEEKDAY_LABELS.map((label, weekday) => (
               <th
                 key={label}
                 scope="col"
-                className={`py-2 text-xs font-medium ${getHeaderColor(weekday)}`}
+                className={cn('py-2 text-xs font-medium', getHeaderColor(weekday))}
               >
                 {label}
               </th>
@@ -110,7 +97,7 @@ export function CalendarGrid({
         </thead>
         <tbody>
           {weeks.map((week, weekIndex) => (
-            <tr key={weekIndex} className="border-b border-gray-100 last:border-0">
+            <tr key={weekIndex}>
               {week.map((cell, weekday) => {
                 if (cell.date === null || cell.day === null) {
                   return <td key={weekday} className="p-0" />;
@@ -131,16 +118,23 @@ export function CalendarGrid({
                       aria-pressed={isSelected}
                       aria-current={isToday ? 'date' : undefined}
                       aria-label={`${year}年${month}月${cell.day}日 ${WEEKDAY_LABELS[weekday]}曜日${getMarkLabel(mark, workCount)}`}
-                      className="flex h-14 w-full flex-col items-center justify-center gap-1 rounded-lg hover:bg-gray-50 transition-colors"
+                      className={cn(
+                        'flex h-14 w-full flex-col items-center justify-center gap-1 rounded-md',
+                        'transition-colors duration-150 ease-out',
+                        'hover:bg-muted outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50'
+                      )}
                     >
                       <span
-                        className={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium ${getCircleClass(isSelected, isToday, weekday)}`}
+                        className={cn(
+                          'flex h-8 w-8 items-center justify-center rounded-full text-sm',
+                          getCircleClass(isSelected, isToday, weekday)
+                        )}
                       >
                         {cell.day}
                       </span>
-                      <span className="flex h-2.5 items-center gap-0.5" aria-hidden="true">
+                      <span className="flex h-1.5 items-center gap-1" aria-hidden="true">
                         {Array.from({ length: dotCount }, (_, i) => (
-                          <span key={i} className="h-2.5 w-2.5 rounded-full bg-gray-400" />
+                          <span key={i} className="bg-muted-foreground h-1.5 w-1.5 rounded-full" />
                         ))}
                       </span>
                     </button>

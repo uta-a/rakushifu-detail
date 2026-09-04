@@ -1,7 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
+import { AlertCircle } from 'lucide-react';
 import { useShifts } from '../hooks/useShifts';
 import { CalendarGrid } from '../components/CalendarGrid';
 import { CalendarDayDetail, CALENDAR_DAY_DETAIL_HEADING_ID } from '../components/CalendarDayDetail';
+import { Card, CardContent } from '../components/ui/card';
+import { Alert, AlertDescription } from '../components/ui/alert';
 import { buildShiftsByDate, defaultSelectedDate, shiftMonth, toDateString } from '../utils/calendar';
 
 interface ShiftCalendarProps {
@@ -44,30 +47,35 @@ export function ShiftCalendar({ onSessionExpired }: ShiftCalendarProps) {
   const isLoading = loading || pending;
 
   return (
-    <div className="space-y-5 sm:space-y-6">
-      <div className="bg-white rounded-2xl border border-gray-200 p-3 sm:p-4" aria-busy={isLoading}>
-        <CalendarGrid
-          year={year}
-          month={month}
-          shiftsByDate={shiftsByDate}
-          selectedDate={selectedDate}
-          todayDate={todayDate}
-          onSelectDate={setSelectedDate}
-          onPrevMonth={() => handleMoveMonth(-1)}
-          onNextMonth={() => handleMoveMonth(1)}
-        />
-      </div>
+    <div className="space-y-5">
+      <Card aria-busy={isLoading}>
+        {/* カレンダーだけ余白を詰めるので、既定パディングは切って自分で指定する */}
+        <CardContent padding="none" className="p-2 sm:p-3">
+          <CalendarGrid
+            year={year}
+            month={month}
+            shiftsByDate={shiftsByDate}
+            selectedDate={selectedDate}
+            todayDate={todayDate}
+            onSelectDate={setSelectedDate}
+            onPrevMonth={() => handleMoveMonth(-1)}
+            onNextMonth={() => handleMoveMonth(1)}
+          />
+        </CardContent>
+      </Card>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">
-          {error}
-        </div>
+        <Alert variant="destructive">
+          <AlertCircle aria-hidden="true" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {/* live region は常設し、中身だけを差し替える（月移動のたびに再マウントさせない） */}
       <section
         aria-labelledby={CALENDAR_DAY_DETAIL_HEADING_ID}
         aria-live="polite"
+        aria-busy={isLoading}
         className="space-y-3"
       >
         {!error && (
