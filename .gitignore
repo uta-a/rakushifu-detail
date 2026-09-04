@@ -39,3 +39,6 @@ Thumbs.db
 # （READMEで使う docs/*.png は対象外）
 .playwright-mcp/
 /*.png
+
+# Hallmark（デザインスキル）の作業履歴。設計の正は design.md 側
+.hallmark/

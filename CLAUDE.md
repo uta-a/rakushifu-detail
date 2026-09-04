@@ -49,9 +49,24 @@ cookie はサーバーに保存せずフロントの sessionStorage のみで保
 - `calcShiftDetail` が1シフトの通常/深夜時間を、`calcMonthlySalary` が月間合計と給料（通常給・深夜給・交通費）を計算する。給料は `Math.floor` で円未満切り捨て。
 - 未対応: 休憩時間（`rest_times`）の控除。形式が不明なためTODOのまま総勤務時間から差し引いていない。
 
+### デザインシステム
+
+`design.md`（リポジトリ直下）が唯一の情報源。UIを触る前に必ず読むこと。
+
+- shadcn/ui neutral のトークンを `src/index.css` の `:root` / `.dark` /
+  `@media (prefers-color-scheme: dark)` に定義。コンポーネントは意味トークン
+  （`bg-primary`, `text-muted-foreground` 等）だけを参照し、`bg-blue-600` のような
+  Tailwind 既定パレットを直書きしない。
+- プリミティブは `src/components/ui/`（button, card, input, label, tabs, alert,
+  skeleton, badge, popover）。新しい見た目が要るときは画面側で className を組まず、
+  ここに variant を足す。
+- 外部依存は `lucide-react` のみ。Radix UI / CVA / tailwind-merge は入れない。
+- 読み込み中は Skeleton（スピナーは使わない）、エラーは `Alert variant="destructive"`。
+- 金額・時間を出す要素には `.tabular` を付ける。
+
 ### フロント構成
 
-- `App.tsx` — ログイン状態による `LoginForm` / `Dashboard` の出し分けのみ。ルーターは無し。
+- `App.tsx` — ログイン状態による `LoginForm` / `MainTabs` の出し分けのみ。ルーターは無し。
 - `pages/Dashboard.tsx` — 月切り替え・設定・シフト表・給料サマリを束ねる。年月stateが変わると `useEffect` で再取得。
 - 時給・交通費の設定（`Settings`）はブラウザに保存。デフォルトは時給1200円・交通費0円。
 - 型は `src/types/shift.ts` に集約。らくしふAPIのレスポンス型（`ShiftApiResponse` 等）とアプリ内部型（`ShiftDetail`, `SalaryResult`）を分けている。
