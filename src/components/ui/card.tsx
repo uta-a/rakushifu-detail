@@ -17,12 +17,17 @@ export function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElemen
 interface CardTitleProps extends ComponentProps<'h2'> {
   /** 見出しレベル。ページ内の階層に合わせて呼び出し側が決める */
   as?: Extract<ElementType, 'h2' | 'h3'>;
+  /**
+   * 文字色。既定の muted を置き換える。
+   * className に text-* を渡すと既定色と衝突して効かないため、必ずこちらを使う。
+   */
+  tone?: string;
 }
 
-export function CardTitle({ className, as: Tag = 'h2', ...props }: CardTitleProps) {
+export function CardTitle({ className, as: Tag = 'h2', tone, ...props }: CardTitleProps) {
   return (
     <Tag
-      className={cn('text-sm font-semibold tracking-tight text-muted-foreground', className)}
+      className={cn('text-sm font-semibold tracking-tight', tone ?? 'text-muted-foreground', className)}
       {...props}
     />
   );

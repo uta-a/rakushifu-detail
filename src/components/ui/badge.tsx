@@ -6,7 +6,8 @@ type Variant = 'default' | 'secondary' | 'outline';
 const VARIANTS: Record<Variant, string> = {
   default: 'bg-primary text-primary-foreground',
   secondary: 'bg-secondary text-secondary-foreground',
-  outline: 'border text-muted-foreground',
+  /** 文字色は親から継承する。text-* を className で足すと衝突するため */
+  outline: 'border',
 };
 
 export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {

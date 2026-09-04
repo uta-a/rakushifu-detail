@@ -8,6 +8,7 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
 import { Skeleton, SkeletonGroup } from '../components/ui/skeleton';
+import { cn } from '../lib/cn';
 
 function todayString(): string {
   const d = new Date();
@@ -24,18 +25,19 @@ function formatMin(min: number): string {
 interface OverlapSectionProps {
   title: string;
   icon: React.ReactNode;
+  /** 職種ごとの意味色。アイコン・見出し・かぶり時間に同じ色を掛ける */
+  tone: string;
   entries: OverlapEntry[];
 }
 
-/** フロア／キッチンの区別は色ではなくアイコンと見出しで持たせる */
-function OverlapSection({ title, icon, entries }: OverlapSectionProps) {
+function OverlapSection({ title, icon, tone, entries }: OverlapSectionProps) {
   return (
     <Card>
       <CardHeader>
-        <span className="text-muted-foreground [&>svg]:size-4" aria-hidden="true">
+        <span className={cn('[&>svg]:size-4', tone)} aria-hidden="true">
           {icon}
         </span>
-        <CardTitle as="h3" className="text-foreground">
+        <CardTitle as="h3" tone={tone}>
           {title}
         </CardTitle>
         <Badge variant="secondary" className="tabular ml-auto">
@@ -57,7 +59,7 @@ function OverlapSection({ title, icon, entries }: OverlapSectionProps) {
                   <span className="text-sm">
                     {formatMin(e.startAsMin)}–{formatMin(e.endAsMin)}
                   </span>
-                  <span className="text-muted-foreground text-xs">
+                  <span className={cn('text-xs', tone)}>
                     かぶり {formatMin(e.overlapStartAsMin)}–{formatMin(e.overlapEndAsMin)}
                   </span>
                 </span>
@@ -115,7 +117,7 @@ export function ShiftOverlap({ onSessionExpired }: ShiftOverlapProps) {
           {result?.self && (
             <p className="text-muted-foreground text-sm">
               自分のシフト{' '}
-              <span className="tabular text-foreground font-medium">
+              <span className="tabular text-work font-medium">
                 {formatMin(result.self.startAsMin)}–{formatMin(result.self.endAsMin)}
               </span>
             </p>
@@ -146,9 +148,15 @@ export function ShiftOverlap({ onSessionExpired }: ShiftOverlapProps) {
           <OverlapSection
             title="フロア"
             icon={<UtensilsCrossed />}
+            tone="text-floor"
             entries={result.floor}
           />
-          <OverlapSection title="キッチン" icon={<ChefHat />} entries={result.kitchen} />
+          <OverlapSection
+            title="キッチン"
+            icon={<ChefHat />}
+            tone="text-kitchen"
+            entries={result.kitchen}
+          />
         </>
       )}
     </div>

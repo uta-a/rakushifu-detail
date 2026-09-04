@@ -42,9 +42,17 @@
   --input-background: oklch(1 0 0);
   --ring: oklch(0.708 0 0);
 
-  /* 曜日色。彩度を落とし、primary（黒）より前に出ないようにする */
-  --sunday: oklch(0.55 0.14 25);
-  --saturday: oklch(0.52 0.09 250);
+  /* 役割ごとの意味色。彩度を 0.08〜0.11 に揃え、明度も同じ帯に置くことで
+   * 5色が「1つの家族」として読めるようにする。primary（黒）より前には出さない。 */
+  --work: oklch(0.47 0.09 162);
+  --late-night: oklch(0.47 0.1 274);
+  --transport: oklch(0.49 0.08 75);
+  --floor: oklch(0.48 0.09 236);
+  --kitchen: oklch(0.5 0.1 45);
+
+  /* 曜日色。上の意味色と同じ明度・彩度の帯に揃える */
+  --sunday: oklch(0.5 0.12 25);
+  --saturday: oklch(0.48 0.09 250);
 
   color-scheme: light dark;
 }
@@ -82,8 +90,14 @@
   --input-background: oklch(1 0 0 / 6%);
   --ring: oklch(0.556 0 0);
 
-  --sunday: oklch(0.7 0.15 25);
-  --saturday: oklch(0.72 0.1 250);
+  --work: oklch(0.76 0.11 162);
+  --late-night: oklch(0.76 0.11 274);
+  --transport: oklch(0.78 0.1 75);
+  --floor: oklch(0.76 0.1 236);
+  --kitchen: oklch(0.77 0.11 45);
+
+  --sunday: oklch(0.75 0.13 25);
+  --saturday: oklch(0.76 0.1 250);
 }
 
 /* OS がダーク、かつ明示的にライトを選んでいないとき（上の .dark と同じ値） */
@@ -110,8 +124,14 @@
     --input-background: oklch(1 0 0 / 6%);
     --ring: oklch(0.556 0 0);
 
-    --sunday: oklch(0.7 0.15 25);
-    --saturday: oklch(0.72 0.1 250);
+    --work: oklch(0.76 0.11 162);
+    --late-night: oklch(0.76 0.11 274);
+    --transport: oklch(0.78 0.1 75);
+    --floor: oklch(0.76 0.1 236);
+    --kitchen: oklch(0.77 0.11 45);
+
+    --sunday: oklch(0.75 0.13 25);
+    --saturday: oklch(0.76 0.1 250);
   }
 }
 
@@ -136,6 +156,11 @@
   --color-input: var(--input);
   --color-input-background: var(--input-background);
   --color-ring: var(--ring);
+  --color-work: var(--work);
+  --color-late-night: var(--late-night);
+  --color-transport: var(--transport);
+  --color-floor: var(--floor);
+  --color-kitchen: var(--kitchen);
   --color-sunday: var(--sunday);
   --color-saturday: var(--saturday);
 

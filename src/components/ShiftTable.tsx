@@ -88,7 +88,7 @@ export function ShiftTable({ shifts }: ShiftTableProps) {
               <td className="px-2 py-2.5 text-right">
                 {shift.isOff ? <Blank /> : formatHours(shift.normalHours)}
               </td>
-              <td className="px-4 py-2.5 text-right font-medium sm:px-6">
+              <td className="text-late-night px-4 py-2.5 text-right font-medium sm:px-6">
                 {shift.isOff || shift.lateNightHours === 0 ? (
                   <Blank />
                 ) : (

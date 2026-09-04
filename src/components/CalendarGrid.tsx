@@ -134,7 +134,7 @@ export function CalendarGrid({
                       </span>
                       <span className="flex h-1.5 items-center gap-1" aria-hidden="true">
                         {Array.from({ length: dotCount }, (_, i) => (
-                          <span key={i} className="bg-muted-foreground h-1.5 w-1.5 rounded-full" />
+                          <span key={i} className="bg-work h-1.5 w-1.5 rounded-full" />
                         ))}
                       </span>
                     </button>

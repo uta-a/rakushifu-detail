@@ -4,6 +4,7 @@ import { formatMonthDayWithWeekday } from '../utils/calendar';
 import { Card, CardContent } from './ui/card';
 import { Skeleton, SkeletonGroup } from './ui/skeleton';
 import { Badge } from './ui/badge';
+import { cn } from '../lib/cn';
 
 interface CalendarDayDetailProps {
   date: string;
@@ -21,11 +22,21 @@ function formatHours(hours: number): string {
   return `${h}時間${m}分`;
 }
 
-/** 内訳1行 */
-function DetailRow({ label, value }: { label: React.ReactNode; value: string }) {
+/** 内訳1行。意味色はラベルと値の両方に掛ける */
+function DetailRow({
+  label,
+  value,
+  tone,
+}: {
+  label: React.ReactNode;
+  value: string;
+  tone?: string;
+}) {
   return (
-    <div className="flex items-center justify-between gap-3 text-sm">
-      <dt className="text-muted-foreground flex items-center gap-1.5">{label}</dt>
+    <div className={cn('flex items-center justify-between gap-3 text-sm', tone)}>
+      <dt className={cn('flex items-center gap-1.5', tone ? 'opacity-90' : 'text-muted-foreground')}>
+        {label}
+      </dt>
       <dd className="tabular font-medium">{value}</dd>
     </div>
   );
@@ -90,9 +101,17 @@ export function CalendarDayDetail({ date, shifts, loading }: CalendarDayDetailPr
                       {detail.endTime}
                     </p>
                     {/* 時刻の下に縦線を通し、その日の内訳をぶら下げる */}
-                    <dl className="ml-1 space-y-2 border-l pl-4">
-                      <DetailRow label="勤務時間" value={formatHours(detail.totalHours)} />
-                      <DetailRow label="通常" value={formatHours(detail.normalHours)} />
+                    <dl className="border-work ml-1 space-y-2 border-l-2 pl-4">
+                      <DetailRow
+                        label="勤務時間"
+                        value={formatHours(detail.totalHours)}
+                        tone="text-work"
+                      />
+                      <DetailRow
+                        label="通常"
+                        value={formatHours(detail.normalHours)}
+                        tone="text-work"
+                      />
                       <DetailRow
                         label={
                           <>
@@ -106,6 +125,7 @@ export function CalendarDayDetail({ date, shifts, loading }: CalendarDayDetailPr
                         value={
                           detail.lateNightHours === 0 ? 'なし' : formatHours(detail.lateNightHours)
                         }
+                        tone={detail.lateNightHours > 0 ? 'text-late-night' : undefined}
                       />
                     </dl>
                   </div>

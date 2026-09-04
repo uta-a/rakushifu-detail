@@ -40,8 +40,13 @@ shadcn/ui neutral（OKLCH）。値の定義は `src/index.css` の `:root` / `.d
 | `--input` | `oklch(0.922 0 0)` | `oklch(1 0 0 / 18%)` |
 | `--input-background` | `oklch(1 0 0)` | `oklch(1 0 0 / 6%)` |
 | `--ring` | `oklch(0.708 0 0)` | `oklch(0.556 0 0)` |
-| `--sunday` | `oklch(0.55 0.14 25)` | `oklch(0.7 0.15 25)` |
-| `--saturday` | `oklch(0.52 0.09 250)` | `oklch(0.72 0.1 250)` |
+| `--work` | `oklch(0.47 0.09 162)` | `oklch(0.76 0.11 162)` |
+| `--late-night` | `oklch(0.47 0.1 274)` | `oklch(0.76 0.11 274)` |
+| `--transport` | `oklch(0.49 0.08 75)` | `oklch(0.78 0.1 75)` |
+| `--floor` | `oklch(0.48 0.09 236)` | `oklch(0.76 0.1 236)` |
+| `--kitchen` | `oklch(0.5 0.1 45)` | `oklch(0.77 0.11 45)` |
+| `--sunday` | `oklch(0.5 0.12 25)` | `oklch(0.75 0.13 25)` |
+| `--saturday` | `oklch(0.48 0.09 250)` | `oklch(0.76 0.1 250)` |
 
 ### 色のルール
 
