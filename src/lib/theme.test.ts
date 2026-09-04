@@ -21,10 +21,14 @@ describe('readStoredTheme', () => {
   });
 
   it('localStorage が例外を投げても system を返す', () => {
+    // 読めれば dark が返る状態にしておく。こうしないと、例外を握りつぶす処理が
+    // 壊れていても「保存がないので system」で通ってしまう
+    localStorage.setItem(KEY, 'dark');
     const spy = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
       throw new Error('denied');
     });
     expect(readStoredTheme()).toBe('system');
+    expect(spy).toHaveBeenCalled();
     spy.mockRestore();
   });
 });
@@ -37,7 +41,10 @@ describe('storeTheme', () => {
       throw new Error('quota');
     });
     expect(() => storeTheme('dark')).not.toThrow();
+    // spy が効かず素通しで保存されていないことも確かめる
+    expect(spy).toHaveBeenCalled();
     spy.mockRestore();
+    expect(localStorage.getItem(KEY)).toBeNull();
   });
 });
 
