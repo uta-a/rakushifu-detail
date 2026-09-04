@@ -92,7 +92,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const cookieString = buildCookieString(allCookies);
 
     return res.status(200).json({ success: true, cookies: cookieString });
-  } catch (error) {
+  } catch {
+    // 認証情報が混ざりうるので、例外の中身はログに残さない
     console.error('Login error');
     return res.status(500).json({ error: 'ログイン処理でエラーが発生しました' });
   }

@@ -43,7 +43,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const data = await response.json();
     return res.status(200).json(data);
-  } catch (error) {
+  } catch {
+    // cookie が混ざりうるので、例外の中身はログに残さない
     console.error('Fetch shifts error');
     return res.status(500).json({ error: 'シフトデータの取得でエラーが発生しました' });
   }
