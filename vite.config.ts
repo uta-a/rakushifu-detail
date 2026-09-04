@@ -15,5 +15,7 @@ export default defineConfig({
   },
   test: {
     environment: 'jsdom',
+    // Node のグローバルが jsdom の Web Storage を覆い隠すため、テスト側で揃える
+    setupFiles: ['./src/test-setup.ts'],
   },
 })
