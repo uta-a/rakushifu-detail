@@ -98,8 +98,11 @@ shadcn/ui neutral（OKLCH）。値の定義は `src/index.css` の `:root` / `.d
 
 ## Spacing / Radius
 
-- `--radius: 0.625rem`。Card = `rounded-lg`、ボタン・入力 = `rounded-md`、
+- `--radius: 0.625rem`。Card・Dialog・FAB = `rounded-lg`、ボタン・入力 = `rounded-md`、
   Badge・丸印 = `rounded-full`。この3段階以外を使わない。
+- Button の角丸は `BASE` ではなく `SIZES` の各エントリが持つ。`fab` だけ `rounded-lg` に
+  するためで、`BASE` に置いたままだと `cn()` が tailwind-merge を通さないぶん
+  生成CSSの並び順で勝敗が決まってしまう。
 - Card 間は `space-y-5`。Card 内パディングは `CardContent` の `padding` プロップで選ぶ
   （`default` / `below-header` / `none`）。**className に `p-*` を渡さない**
   — `cn()` は tailwind-merge を通さない単純結合なので、生成CSSの並び順で
@@ -115,8 +118,11 @@ shadcn/ui neutral（OKLCH）。値の定義は `src/index.css` の `:root` / `.d
 border + bg-card + rounded-lg（影なし）
 ```
 
-`shadow-lg` は使わない。影は「浮いているもの」（Popover = `shadow-md`、
-segmented control の選択タブ = `shadow-xs`）に限る。
+`shadow-lg` は使わない。影は「浮いているもの」（Popover / Dialog / FAB（`Button size="fab"`）
+= `shadow-md`、segmented control の選択タブ = `shadow-xs`）に限る。
+
+重なりの順序は3段だけ。`z-10` = sticky なヘッダーとフッター、`z-20` = Popover と FAB、
+モーダルは `<dialog>` の showModal()（top layer なので z-index を持たない）。
 
 ## Motion
 
@@ -148,14 +154,16 @@ segmented control の選択タブ = `shadow-xs`）に限る。
 
 | ファイル | 役割 |
 | --- | --- |
-| `button.tsx` | variant: default / secondary / outline / ghost / destructive、size: default / sm / lg / icon |
+| `button.tsx` | variant: default / secondary / outline / ghost / destructive、size: default / sm / lg / icon / fab（右下に浮かせる 56px の角丸四角。配置は呼び出し側が持つ） |
 | `card.tsx` | Card / CardHeader / CardTitle（`as` で h2・h3）/ CardContent（`padding` プロップ） |
 | `input.tsx` `label.tsx` | フォーム |
+| `select.tsx` | ネイティブ `<select>` を Input と同じ見た目に揃えたもの。時刻など選択肢が確定している入力に使う |
 | `tabs.tsx` | segmented control。manual activation（矢印はフォーカス移動のみ、Enter/Space/クリックで確定）。タブ切り替えのたびに API を叩くため automatic activation は使わない |
 | `alert.tsx` | Alert / AlertTitle / AlertDescription |
 | `skeleton.tsx` | Skeleton（プレースホルダ）と SkeletonGroup（読み上げラベル付きの包み） |
 | `badge.tsx` | default / secondary / outline |
 | `popover.tsx` | Esc・外側クリックで閉じ、フォーカスをトリガーに戻す。`label` 必須。トリガーは props を DOM の `<button>` に展開するコンポーネントを渡すこと |
+| `dialog.tsx` | ネイティブ `<dialog>` + `showModal()` のモーダル。`title` 必須。フォーカストラップと背面の不活性化はブラウザに任せる。閉じているあいだは描画しない。Popover は absolute 配置でトラップも無いので、モーダル用途には使わない |
 
 共通コンポーネント（`ui/` の外）:
 
@@ -175,6 +183,10 @@ shadcn/ui の CLI・Radix UI・CVA・tailwind-merge は導入しない。
 トークンと薄いプリミティブだけを自前で持ち、外部依存は `lucide-react` のみに保つ。
 Radix が必要になるほど複雑な要件（複数レイヤーの Dialog、仮想リストの Combobox 等）が
 出てきた時点で、改めてこのファイルを更新して判断する。
+
+単一レイヤーの Dialog はネイティブ `<dialog>` で自前実装した（2026-09）。
+フォーカストラップを手書きせずに済むため。Dialog の上に Dialog を重ねる要件が出たら、
+そのときに Radix を入れるか判断する。
 
 ## 画面が共有しなければならないもの
 
