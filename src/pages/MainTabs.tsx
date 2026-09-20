@@ -3,10 +3,14 @@ import { CalendarDays, Users, Wallet } from 'lucide-react';
 import { ShiftCalendar } from './ShiftCalendar';
 import { ShiftOverlap } from './ShiftOverlap';
 import { Dashboard } from './Dashboard';
+import { ShiftSubmit } from './ShiftSubmit';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { TabPanel, Tabs, type TabItem } from '../components/ui/tabs';
 
 type TabKey = 'calendar' | 'overlap' | 'salary';
+
+/** ルーターは持たず、提出画面はタブバーごと差し替える */
+type View = 'tabs' | 'submit';
 
 const TAB_PREFIX = 'main';
 
@@ -22,6 +26,13 @@ interface MainTabsProps {
 
 export function MainTabs({ onSessionExpired }: MainTabsProps) {
   const [active, setActive] = useState<TabKey>('calendar');
+  const [view, setView] = useState<View>('tabs');
+
+  if (view === 'submit') {
+    // タブ側は丸ごとアンマウントされるので、戻ったときにカレンダーが再取得され、
+    // 提出した内容がそのまま反映される
+    return <ShiftSubmit onBack={() => setView('tabs')} onSessionExpired={onSessionExpired} />;
+  }
 
   return (
     <div className="bg-background min-h-screen">
@@ -43,7 +54,12 @@ export function MainTabs({ onSessionExpired }: MainTabsProps) {
 
       <main className="mx-auto max-w-3xl px-4 py-5 sm:py-6">
         <TabPanel idPrefix={TAB_PREFIX} value={active}>
-          {active === 'calendar' && <ShiftCalendar onSessionExpired={onSessionExpired} />}
+          {active === 'calendar' && (
+            <ShiftCalendar
+              onSessionExpired={onSessionExpired}
+              onOpenSubmit={() => setView('submit')}
+            />
+          )}
           {active === 'overlap' && <ShiftOverlap onSessionExpired={onSessionExpired} />}
           {active === 'salary' && <Dashboard onSessionExpired={onSessionExpired} />}
         </TabPanel>

@@ -1,17 +1,20 @@
 import { useState, useEffect, useMemo } from 'react';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Plus } from 'lucide-react';
 import { useShifts } from '../hooks/useShifts';
 import { CalendarGrid } from '../components/CalendarGrid';
 import { CalendarDayDetail, CALENDAR_DAY_DETAIL_HEADING_ID } from '../components/CalendarDayDetail';
+import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { buildShiftsByDate, defaultSelectedDate, shiftMonth, toDateString } from '../utils/calendar';
 
 interface ShiftCalendarProps {
   onSessionExpired: () => void;
+  /** 右下の＋から希望シフト提出画面へ */
+  onOpenSubmit: () => void;
 }
 
-export function ShiftCalendar({ onSessionExpired }: ShiftCalendarProps) {
+export function ShiftCalendar({ onSessionExpired, onOpenSubmit }: ShiftCalendarProps) {
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
@@ -47,7 +50,8 @@ export function ShiftCalendar({ onSessionExpired }: ShiftCalendarProps) {
   const isLoading = loading || pending;
 
   return (
-    <div className="space-y-5">
+    // FAB が最下部のカードに被らないよう下に余白を取る
+    <div className="space-y-5 pb-20">
       <Card aria-busy={isLoading}>
         {/* カレンダーだけ余白を詰めるので、既定パディングは切って自分で指定する */}
         <CardContent padding="none" className="p-2 sm:p-3">
@@ -86,6 +90,20 @@ export function ShiftCalendar({ onSessionExpired }: ShiftCalendarProps) {
           />
         )}
       </section>
+
+      {/* 本文カラムの右端に揃えたいので、max-w-3xl のラッパを噛ませる */}
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-20">
+        <div className="mx-auto flex max-w-3xl justify-end px-4 pb-6 sm:pb-8">
+          <Button
+            size="fab"
+            className="pointer-events-auto"
+            aria-label="希望シフトを提出"
+            onClick={onOpenSubmit}
+          >
+            <Plus aria-hidden="true" className="size-6" />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
