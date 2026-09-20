@@ -9,6 +9,8 @@ const PATHS = [
   '/typed/api/staff/basic_shifts/me',
   '/typed/api/staff/user_acceptable_working_times',
   '/typed/api/staff/desired_off_limit',
+  // 所属職種（attending_genre_id）を取るためだけに叩く
+  '/ajax/organizations',
 ] as const;
 
 interface RawSubmitTerm {
@@ -76,9 +78,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(failed.status).json({ error: '提出情報の取得に失敗しました' });
     }
 
-    const [termsJson, storesJson, basicJson, acceptableJson, offLimitJson] = await Promise.all(
-      responses.map((r) => r.json())
-    );
+    const [termsJson, storesJson, basicJson, acceptableJson, offLimitJson, orgJson] =
+      await Promise.all(responses.map((r) => r.json()));
 
     const rawTerms = termsJson?.results as RawSubmitTerm[] | undefined;
     const rawStores = storesJson?.results as RawStore[] | undefined;
@@ -91,7 +92,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // 上流のレスポンスをそのまま返さず、画面が使うフィールドだけに絞る
+    // （/ajax/organizations は氏名やメールも含むので、職種だけを取り出す）
     return res.status(200).json({
+      currentGenreId:
+        typeof orgJson?.current_user?.current_belong_genre_id === 'number'
+          ? orgJson.current_user.current_belong_genre_id
+          : 0,
       terms: rawTerms.map((t) => ({
         user_id: t.user_id,
         store_id: t.store_id,

@@ -213,6 +213,8 @@ export interface ShiftUpsertItem {
 
 /** /api/submit-context が返す、提出画面の初期コンテキスト */
 export interface SubmitContextResponse {
+  /** 自分の所属職種。upsert の attending_genre_id に使う */
+  currentGenreId: number;
   terms: SubmitTerm[];
   stores: SubmittableStore[];
   basicShifts: BasicShift[];
