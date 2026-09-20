@@ -41,9 +41,25 @@ npm run dev                    # フロント。/api/* は 3001 にプロキシ�
 
 cookie はサーバーに保存せずフロントの sessionStorage のみで保持し、リクエストごとにヘッダーで渡す構造。認証情報を扱うため `api/` の入力バリデーション（型・長さチェック）は維持すること。
 
+### 希望シフトの提出
+
+確定シフト（`/ajax/*`）とは別系統の `/typed/api/staff/*` を使う。`api/` は3本。
+
+1. `api/submit-context.ts` — 提出期間（`user_submit_terms`）・提出先店舗（時刻の刻みと入力可能な時間帯）・基本シフト・勤務可能時間帯・休み希望の上限・所属職種を、1往復にまとめて返す。画面を開いた時点で全部必要なため。
+2. `api/desired-shifts.ts` — 指定期間の提出済み希望シフト。
+3. `api/submit-shifts.ts` — 提出（upsert）。
+
+**upsert は期間を丸ごと置き換える。** 期間内の全日付を送る必要があり、希望を出さない日は `desired_schedule: null` を送る。日を落とすと、その日の提出済みの希望が消える。`toUpsertPayload`（`src/utils/shiftSubmit.ts`）がこの不変条件を担保しているので、ここを変えるときはテストを必ず見ること。
+
+**CSRF が必要。** らくしふの更新系は Rails の CSRF 保護下にあり、提出ページの HTML に埋め込まれた `data-csrf-token` を `X-CSRF-Token` で送る。トークンはセッションと対なので、`api/submit-shifts.ts` は「提出ページを GET → トークン抽出 → その GET で回転した `_Rakushifu_session` に差し替えて POST」する。既存の `api/` で唯一の更新系なので、`req.body` はそのまま中継せず、許可キーだけを検証して詰め替えている。
+
+**初期値を入れるのは未提出の期間だけ。** 公式は未提出の期間に限り、勤務可能時間帯（無ければ基本シフト）を店舗の入力可能範囲でクランプしたものを既定値として全日に入れる。提出済みの期間では空欄のままにする。ここを取り違えると、希望を出さないことにした日が出勤希望として復活する。
+
+ロジックは `src/utils/shiftSubmit.ts` に集約（`salaryCalculator.ts` と同じく UI から独立した純粋関数）。
+
 ### 給料計算ロジック
 
-`src/utils/salaryCalculator.ts` に集約。UIから独立した純粋関数で、ここが唯一のテスト対象（`salaryCalculator.test.ts`）。
+`src/utils/salaryCalculator.ts` に集約。UIから独立した純粋関数（`salaryCalculator.test.ts`）。
 
 - 深夜割増は 22:00〜翌5:00 を x1.25。`calcLateNightMinutes` が日跨ぎシフト（例 22:00〜02:00）を含めて深夜該当分を分単位で算出する。ロジック変更時は日跨ぎ・深夜境界のケースを必ずテストで担保する。
 - `calcShiftDetail` が1シフトの通常/深夜時間を、`calcMonthlySalary` が月間合計と給料（通常給・深夜給・交通費）を計算する。給料は `Math.floor` で円未満切り捨て。
@@ -67,6 +83,7 @@ cookie はサーバーに保存せずフロントの sessionStorage のみで保
 ### フロント構成
 
 - `App.tsx` — ログイン状態による `LoginForm` / `MainTabs` の出し分けのみ。ルーターは無し。
+- `pages/MainTabs.tsx` — タブの出し分けに加えて `view` state を持つ。`'submit'` のときはタブバーごと `ShiftSubmit` に差し替える（ルーターが無いための擬似的なページ遷移）。導線はカレンダー右下の FAB（`Button size="fab"`）。
 - `pages/Dashboard.tsx` — 月切り替え・設定・シフト表・給料サマリを束ねる。年月stateが変わると `useEffect` で再取得。
 - 時給・交通費の設定（`Settings`）はブラウザに保存。デフォルトは時給1200円・交通費0円。
 - 型は `src/types/shift.ts` に集約。らくしふAPIのレスポンス型（`ShiftApiResponse` 等）とアプリ内部型（`ShiftDetail`, `SalaryResult`）を分けている。
@@ -74,4 +91,5 @@ cookie はサーバーに保存せずフロントの sessionStorage のみで保
 ## 注意点
 
 - らくしふの非公開APIに依存しているため、エンドポイントやcookie名（`xbit_at`）、レスポンス構造が変わると壊れる。`api/` を触るときはらくしふ側の仕様変更を疑う。
+- 提出の CSRF トークンは提出ページの HTML をスクレイピングして取っている。マークアップが変わると壊れるので、取得できなかった場合は専用の文言（「提出トークンの取得に失敗しました」）で 502 を返し、他の失敗と切り分けられるようにしてある。
 - `vercel.json` にCSP等のセキュリティヘッダーを設定済み。`connect-src 'self'` のため外部への直接fetchは不可（プロキシ前提の制約）。フロントで外部リソースを増やす場合はCSPも更新する。
