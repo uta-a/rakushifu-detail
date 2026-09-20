@@ -134,13 +134,20 @@ function findByWeekday<T extends WeekdayTime>(list: T[], weekday: number): T | u
 }
 
 /**
- * 未提出の日の初期値。公式は勤務可能時間帯を店舗の範囲でクランプしたものを既定にし、
- * 勤務可能時間帯が無ければ基本シフトを使う（会社設定でどちらが有効かが決まる）。
- * どちらも無い日は「希望なし」で、時刻だけ店舗の範囲から埋めておく。
+ * 希望が入っていない日の状態。
+ *
+ * 未提出の期間だけ、公式と同じく初期値を入れる。勤務可能時間帯を店舗の範囲で
+ * クランプしたものを既定にし、勤務可能時間帯が無ければ基本シフトを使う
+ * （会社設定でどちらが有効かが決まる）。
+ *
+ * 提出済みの期間では初期値を入れない。入れてしまうと、いったん希望を出さないことに
+ * した日が出勤希望として復活し、そのまま再提出すると意図しない希望が増える。
+ * 公式も提出済みの期間では空欄のままにしている。
  */
 function seedEntry(
   date: string,
   weekday: number,
+  seed: boolean,
   basicShifts: BasicShift[],
   acceptableTimes: AcceptableWorkingTime[],
   store: Pick<SubmittableStore, 'min_hour' | 'max_hour'>
@@ -155,6 +162,8 @@ function seedEntry(
     memo: '',
     fixedShiftLogId: null,
   };
+
+  if (!seed) return fallback;
 
   const source = findByWeekday(acceptableTimes, weekday) ?? findByWeekday(basicShifts, weekday);
   if (!source) return fallback;
@@ -176,10 +185,10 @@ function seedEntry(
 
 /**
  * 期間内の全日付ぶんの入力状態を作る。
- * 提出済みの希望があればそれを、無ければ初期値（勤務可能時間帯 or 基本シフト）を使う。
+ * 提出済みの希望があればそれを使い、無い日は seedEntry に任せる。
  */
 export function buildDayEntries(
-  term: Pick<SubmitTerm, 'start_date' | 'end_date'>,
+  term: Pick<SubmitTerm, 'start_date' | 'end_date' | 'submitted'>,
   existing: DesiredSchedule[],
   basicShifts: BasicShift[],
   acceptableTimes: AcceptableWorkingTime[],
@@ -191,7 +200,7 @@ export function buildDayEntries(
     const weekday = parseShiftDate(date).getDay();
     const submitted = byDate.get(date);
     if (!submitted) {
-      return seedEntry(date, weekday, basicShifts, acceptableTimes, store);
+      return seedEntry(date, weekday, !term.submitted, basicShifts, acceptableTimes, store);
     }
     return {
       date,

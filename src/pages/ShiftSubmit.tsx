@@ -89,8 +89,18 @@ export function ShiftSubmit({ onBack, onSessionExpired }: ShiftSubmitProps) {
     [context]
   );
   const termIndex = termIndexOverride ?? defaultIndex;
-  const term = context && termIndex >= 0 ? context.terms[termIndex] : undefined;
-  const termKey = term ? term.start_date : '';
+  const rawTerm = context && termIndex >= 0 ? context.terms[termIndex] : undefined;
+  const termKey = rawTerm ? rawTerm.start_date : '';
+
+  // 提出直後は context の submitted が古いままなので、この画面から出した分を重ねる。
+  // buildDayEntries はこのフラグで「初期値を入れるかどうか」を決める
+  const term = useMemo(
+    () =>
+      rawTerm
+        ? { ...rawTerm, submitted: rawTerm.submitted || submittedTermKey === rawTerm.start_date }
+        : undefined,
+    [rawTerm, submittedTermKey]
+  );
 
   const store: SubmittableStore | undefined = useMemo(() => {
     if (!context || !term) return undefined;

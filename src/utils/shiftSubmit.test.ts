@@ -284,6 +284,20 @@ describe('buildDayEntries', () => {
     expect(first.kind).toBe('none');
   });
 
+  it('提出済みの期間では希望の無い日に初期値を入れない', () => {
+    // 入れてしまうと、希望を出さないことにした日が出勤希望として復活してしまう
+    const submittedTerm = makeTerm({ ...term, submitted: true });
+    const existing = [makeDesired({ date: '2026-11-02' })];
+    const entries = buildDayEntries(submittedTerm, existing, [], acceptable, STORE);
+    expect(entries.map((e) => e.kind)).toEqual(['none', 'work', 'none']);
+  });
+
+  it('提出済みの期間では基本シフトも入れない', () => {
+    const submittedTerm = makeTerm({ ...term, submitted: true });
+    const entries = buildDayEntries(submittedTerm, [], [makeBasicShift({ weekday: 0 })], [], STORE);
+    expect(entries[0].kind).toBe('none');
+  });
+
   it('提出済みの希望が初期値より優先される', () => {
     const existing = [makeDesired({ date: '2026-11-01', start_hour: 20, memo_text: 'テスト' })];
     const [first] = buildDayEntries(term, existing, [], acceptable, STORE);
