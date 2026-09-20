@@ -98,11 +98,8 @@ shadcn/ui neutral（OKLCH）。値の定義は `src/index.css` の `:root` / `.d
 
 ## Spacing / Radius
 
-- `--radius: 0.625rem`。Card・Dialog・FAB = `rounded-lg`、ボタン・入力 = `rounded-md`、
+- `--radius: 0.625rem`。Card・Dialog = `rounded-lg`、ボタン・入力 = `rounded-md`、
   Badge・丸印 = `rounded-full`。この3段階以外を使わない。
-- Button の角丸は `BASE` ではなく `SIZES` の各エントリが持つ。`fab` だけ `rounded-lg` に
-  するためで、`BASE` に置いたままだと `cn()` が tailwind-merge を通さないぶん
-  生成CSSの並び順で勝敗が決まってしまう。
 - Card 間は `space-y-5`。Card 内パディングは `CardContent` の `padding` プロップで選ぶ
   （`default` / `below-header` / `none`）。**className に `p-*` を渡さない**
   — `cn()` は tailwind-merge を通さない単純結合なので、生成CSSの並び順で
@@ -118,10 +115,10 @@ shadcn/ui neutral（OKLCH）。値の定義は `src/index.css` の `:root` / `.d
 border + bg-card + rounded-lg（影なし）
 ```
 
-`shadow-lg` は使わない。影は「浮いているもの」（Popover / Dialog / FAB（`Button size="fab"`）
-= `shadow-md`、segmented control の選択タブ = `shadow-xs`）に限る。
+`shadow-lg` は使わない。影は「浮いているもの」（Popover / Dialog = `shadow-md`、
+segmented control の選択タブ = `shadow-xs`）に限る。
 
-重なりの順序は3段だけ。`z-10` = sticky なヘッダーとフッター、`z-20` = Popover と FAB、
+重なりの順序は3段だけ。`z-10` = sticky なヘッダーとフッター、`z-20` = Popover、
 モーダルは `<dialog>` の showModal()（top layer なので z-index を持たない）。
 
 ## Motion
@@ -154,7 +151,7 @@ border + bg-card + rounded-lg（影なし）
 
 | ファイル | 役割 |
 | --- | --- |
-| `button.tsx` | variant: default / secondary / outline / ghost / destructive、size: default / sm / lg / icon / fab（右下に浮かせる 56px の角丸四角。配置は呼び出し側が持つ） |
+| `button.tsx` | variant: default / secondary / outline / ghost / destructive、size: default / sm / lg / icon |
 | `card.tsx` | Card / CardHeader / CardTitle（`as` で h2・h3）/ CardContent（`padding` プロップ） |
 | `input.tsx` `label.tsx` | フォーム |
 | `select.tsx` | ネイティブ `<select>` を Input と同じ見た目に揃えたもの。時刻など選択肢が確定している入力に使う |
@@ -167,7 +164,7 @@ border + bg-card + rounded-lg（影なし）
 
 共通コンポーネント（`ui/` の外）:
 
-- `MonthNav.tsx` — カレンダーと給料計算で共有する月送り。**画面ごとに作り直さない。**
+- `MonthNav.tsx` — カレンダーと給与計算で共有する月送り。**画面ごとに作り直さない。**
   その月が画面の主対象なら `as="h2"` を渡して見出しにする。
 - `ThemeToggle.tsx` — ライト / ダーク / OS設定の radiogroup。
 

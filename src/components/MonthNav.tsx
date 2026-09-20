@@ -16,7 +16,7 @@ interface MonthNavProps {
   as?: Extract<ElementType, 'h2' | 'p'>;
 }
 
-/** カレンダーと給料計算で共有する月送り。両画面で見た目と操作を揃える */
+/** カレンダーと給与計算で共有する月送り。両画面で見た目と操作を揃える */
 export function MonthNav({
   year,
   month,

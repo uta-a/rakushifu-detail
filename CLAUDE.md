@@ -83,7 +83,8 @@ cookie はサーバーに保存せずフロントの sessionStorage のみで保
 ### フロント構成
 
 - `App.tsx` — ログイン状態による `LoginForm` / `MainTabs` の出し分けのみ。ルーターは無し。
-- `pages/MainTabs.tsx` — タブの出し分けに加えて `view` state を持つ。`'submit'` のときはタブバーごと `ShiftSubmit` に差し替える（ルーターが無いための擬似的なページ遷移）。導線はカレンダー右下の FAB（`Button size="fab"`）。
+- `pages/MainTabs.tsx` — タブは カレンダー / 給与計算 / シフト管理 の3つ。`active` state による条件レンダリングで出し分ける。シフト管理タブに未提出の変更があるときは、タブ移動を Dialog で引き止める（タブを移るとアンマウントで失われるため）。
+- `pages/ShiftCalendar.tsx` — 月グリッド + 選択日の詳細 + `DayOverlap`（その日に同じ時間へ入る人）。かぶりは選択日に連動し、専用の日付入力は持たない。
 - `pages/Dashboard.tsx` — 月切り替え・設定・シフト表・給料サマリを束ねる。年月stateが変わると `useEffect` で再取得。
 - 時給・交通費の設定（`Settings`）はブラウザに保存。デフォルトは時給1200円・交通費0円。
 - 型は `src/types/shift.ts` に集約。らくしふAPIのレスポンス型（`ShiftApiResponse` 等）とアプリ内部型（`ShiftDetail`, `SalaryResult`）を分けている。
