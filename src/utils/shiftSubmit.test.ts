@@ -23,7 +23,7 @@ import type {
   SubmittableStore,
 } from '../types/shift';
 
-/** 実測値（ＹＭ小田原駅前）に合わせた店舗設定 */
+/** 実店舗から観測した設定値（5分刻み・8時〜24時）に合わせたもの */
 const STORE: Pick<SubmittableStore, 'min_hour' | 'max_hour' | 'interval_minute'> = {
   min_hour: 8,
   max_hour: 24,
@@ -32,7 +32,7 @@ const STORE: Pick<SubmittableStore, 'min_hour' | 'max_hour' | 'interval_minute'>
 
 function makeTerm(overrides: Partial<SubmitTerm> = {}): SubmitTerm {
   return {
-    user_id: 174321,
+    user_id: 1,
     store_id: 1841,
     start_date: '2026-11-01',
     end_date: '2026-11-15',
