@@ -84,21 +84,30 @@ function OverlapSkeleton() {
 interface DayOverlapProps {
   /** "YYYY-MM-DD"。カレンダーで選んでいる日 */
   date: string;
+  /**
+   * その日の自分のシフトの勤務店舗。呼び出し側が既に持っている値を渡す。
+   * その日に出勤しない（休み・シフトなし・取得中）なら null。
+   */
+  storeId: number | null;
   onSessionExpired: () => void;
 }
 
 /**
  * カレンダーで選んだ日に、同じ時間帯へ入るフロア／キッチンの人を出す。
  *
- * 自分のシフトが無い日は何も描かない。その旨は直前の CalendarDayDetail が
- * 「休み」「この日のシフトはありません」として既に伝えているため。
+ * 出勤しない日は storeId が null で渡り、取得も描画もしない。結果が空と分かるためだけに
+ * 往復するのを避けるため。条件付きで描画するのではなく常に置いて storeId で制御するのは、
+ * アンマウントで useOverlap のキャッシュが消えてしまうのを防ぐため。
  */
-export function DayOverlap({ date, onSessionExpired }: DayOverlapProps) {
+export function DayOverlap({ date, storeId, onSessionExpired }: DayOverlapProps) {
   const { result, loading, error, fetchOverlap } = useOverlap(onSessionExpired);
 
   useEffect(() => {
-    fetchOverlap(date);
-  }, [date, fetchOverlap]);
+    if (storeId === null) return;
+    fetchOverlap(storeId, date);
+  }, [storeId, date, fetchOverlap]);
+
+  if (storeId === null) return null;
 
   if (error) {
     return (

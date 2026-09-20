@@ -50,34 +50,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     Referer: `${BASE_URL}/staff/v2/schedules/confirmed`,
   };
 
+  const genreQuery = GENRE_IDS.map((g) => `genre_ids[]=${g}`).join('&');
+  const shiftUrl =
+    `${BASE_URL}/ajax/admin/v2/schedules?page_ctx_name=staff&store_id=${storeId}` +
+    `&${genreQuery}&start_date=${date}&end_date=${date}&is_staff_print_page=false`;
+
   try {
-    // 1. 自分の user_id を取得
-    const orgRes = await fetch(`${BASE_URL}/ajax/organizations`, { headers: commonHeaders });
-    if (orgRes.status === 401) {
+    // 自分の user_id と店舗の指定日シフトは互いに依存しないので同時に取る。
+    // 直列にすると日付を選ぶたびに往復が倍になり、体感がそのまま遅くなる。
+    const [orgRes, shiftRes] = await Promise.all([
+      fetch(`${BASE_URL}/ajax/organizations`, { headers: commonHeaders }),
+      fetch(shiftUrl, { headers: commonHeaders }),
+    ]);
+
+    if (orgRes.status === 401 || shiftRes.status === 401) {
       return res.status(401).json({ error: 'ログインしてください' });
     }
     if (!orgRes.ok) {
       return res.status(orgRes.status).json({ error: 'ユーザー情報の取得に失敗しました' });
     }
-    const org = await orgRes.json();
+    if (!shiftRes.ok) {
+      return res.status(shiftRes.status).json({ error: 'シフトデータの取得に失敗しました' });
+    }
+
+    const [org, data] = await Promise.all([orgRes.json(), shiftRes.json()]);
     const selfUserId = org?.current_user?.id;
     if (typeof selfUserId !== 'number') {
       return res.status(502).json({ error: 'ユーザー情報の解析に失敗しました' });
     }
-
-    // 2. 店舗の指定日シフトを取得
-    const genreQuery = GENRE_IDS.map((g) => `genre_ids[]=${g}`).join('&');
-    const url =
-      `${BASE_URL}/ajax/admin/v2/schedules?page_ctx_name=staff&store_id=${storeId}` +
-      `&${genreQuery}&start_date=${date}&end_date=${date}&is_staff_print_page=false`;
-    const shiftRes = await fetch(url, { headers: commonHeaders });
-    if (shiftRes.status === 401) {
-      return res.status(401).json({ error: 'ログインしてください' });
-    }
-    if (!shiftRes.ok) {
-      return res.status(shiftRes.status).json({ error: 'シフトデータの取得に失敗しました' });
-    }
-    const data = await shiftRes.json();
 
     const nameById = new Map<number, string>(
       (data.users as StoreUser[] | undefined)?.map((u) => [u.id, u.name]) ?? []

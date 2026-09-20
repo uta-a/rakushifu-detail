@@ -47,6 +47,12 @@ export function ShiftCalendar({ onSessionExpired }: ShiftCalendarProps) {
   const todayDate = toDateString(now);
   const isLoading = loading || pending;
 
+  // かぶりを出すのは出勤する日だけ。休み・シフトなしの日は結果が必ず空になるので、
+  // 取得そのものを走らせない。店舗はその日のシフトから取れるので再取得も要らない。
+  const selectedWorkShift = shiftsByDate.get(selectedDate)?.find((entry) => !entry.detail.isOff);
+  const overlapStoreId =
+    !isLoading && selectedWorkShift ? selectedWorkShift.schedule.attending_store_id : null;
+
   return (
     <div className="space-y-5">
       <Card aria-busy={isLoading}>
@@ -88,8 +94,17 @@ export function ShiftCalendar({ onSessionExpired }: ShiftCalendarProps) {
         )}
       </section>
 
-      {/* かぶりは選択日に連動させる。live region の外に置き、読み上げを詳細だけに絞る */}
-      {!error && <DayOverlap date={selectedDate} onSessionExpired={onSessionExpired} />}
+      {/*
+        かぶりは選択日に連動させる。live region の外に置き、読み上げを詳細だけに絞る。
+        出勤しない日も storeId=null で置いたままにして、取得済みのキャッシュを保つ。
+      */}
+      {!error && (
+        <DayOverlap
+          date={selectedDate}
+          storeId={overlapStoreId}
+          onSessionExpired={onSessionExpired}
+        />
+      )}
     </div>
   );
 }
