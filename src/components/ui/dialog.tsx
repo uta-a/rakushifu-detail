@@ -91,7 +91,7 @@ export function Dialog({
       }}
       className={cn(
         'bg-card text-card-foreground m-auto w-[min(28rem,calc(100vw-2rem))] rounded-lg border p-0 shadow-md',
-        'backdrop:bg-foreground/50',
+        'backdrop:bg-overlay',
         className
       )}
     >

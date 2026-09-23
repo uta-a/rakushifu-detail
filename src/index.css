@@ -41,6 +41,9 @@
   --input: oklch(0.922 0 0);
   --input-background: oklch(1 0 0);
   --ring: oklch(0.708 0 0);
+  /* モーダルの背面を沈めるベール。テーマに関わらず暗くする
+   * （--foreground を使うとダークでは白いベールになってしまう） */
+  --overlay: oklch(0 0 0 / 50%);
 
   /* 役割ごとの意味色。彩度を 0.08〜0.11 に揃え、明度も同じ帯に置くことで
    * 5色が「1つの家族」として読めるようにする。primary（黒）より前には出さない。 */
@@ -89,6 +92,7 @@
   --input: oklch(1 0 0 / 18%);
   --input-background: oklch(1 0 0 / 6%);
   --ring: oklch(0.556 0 0);
+  --overlay: oklch(0 0 0 / 70%);
 
   --work: oklch(0.76 0.11 162);
   --late-night: oklch(0.76 0.11 274);
@@ -123,6 +127,7 @@
     --input: oklch(1 0 0 / 18%);
     --input-background: oklch(1 0 0 / 6%);
     --ring: oklch(0.556 0 0);
+    --overlay: oklch(0 0 0 / 70%);
 
     --work: oklch(0.76 0.11 162);
     --late-night: oklch(0.76 0.11 274);
@@ -156,6 +161,7 @@
   --color-input: var(--input);
   --color-input-background: var(--input-background);
   --color-ring: var(--ring);
+  --color-overlay: var(--overlay);
   --color-work: var(--work);
   --color-late-night: var(--late-night);
   --color-transport: var(--transport);

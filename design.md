@@ -40,6 +40,7 @@ shadcn/ui neutral（OKLCH）。値の定義は `src/index.css` の `:root` / `.d
 | `--input` | `oklch(0.922 0 0)` | `oklch(1 0 0 / 18%)` |
 | `--input-background` | `oklch(1 0 0)` | `oklch(1 0 0 / 6%)` |
 | `--ring` | `oklch(0.708 0 0)` | `oklch(0.556 0 0)` |
+| `--overlay` | `oklch(0 0 0 / 50%)` | `oklch(0 0 0 / 70%)` |
 | `--work` | `oklch(0.47 0.09 162)` | `oklch(0.76 0.11 162)` |
 | `--late-night` | `oklch(0.47 0.1 274)` | `oklch(0.76 0.11 274)` |
 | `--transport` | `oklch(0.49 0.08 75)` | `oklch(0.78 0.1 75)` |
@@ -121,6 +122,10 @@ segmented control の選択タブ = `shadow-xs`）に限る。
 重なりの順序は3段だけ。`z-10` = sticky なヘッダーとフッター、`z-20` = Popover、
 モーダルは `<dialog>` の showModal()（top layer なので z-index を持たない）。
 
+モーダルの背面は `--overlay`（`Dialog` の `backdrop:bg-overlay`）で沈める。
+**`--foreground` を使わないこと** — ダークでは白に近いので、背面が白く曇る。
+ベールは両テーマとも黒で、ダークは背面自体が暗いぶん濃く敷く。
+
 ## Motion
 
 - `transition-colors duration-150 ease-out`。`--ease-out` は `@theme inline` で
@@ -154,7 +159,7 @@ segmented control の選択タブ = `shadow-xs`）に限る。
 | `button.tsx` | variant: default / secondary / outline / ghost / destructive、size: default / sm / lg / icon |
 | `card.tsx` | Card / CardHeader / CardTitle（`as` で h2・h3）/ CardContent（`padding` プロップ） |
 | `input.tsx` `label.tsx` | フォーム |
-| `select.tsx` | ネイティブ `<select>` を Input と同じ見た目に揃えたもの。時刻など選択肢が確定している入力に使う |
+| `select.tsx` | ネイティブ `<select>` を Input と同じ見た目に揃えたもの。時刻など選択肢が確定している入力に使う。面だけは `--input-background` ではなく `--popover` を使う（ブラウザが開いた一覧の背景に select 自身の background-color を使うため、ダークの半透明な白だと一覧が白く潰れる） |
 | `tabs.tsx` | segmented control。manual activation（矢印はフォーカス移動のみ、Enter/Space/クリックで確定）。タブ切り替えのたびに API を叩くため automatic activation は使わない |
 | `alert.tsx` | Alert / AlertTitle / AlertDescription |
 | `skeleton.tsx` | Skeleton（プレースホルダ）と SkeletonGroup（読み上げラベル付きの包み） |
