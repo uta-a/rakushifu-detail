@@ -23,3 +23,8 @@ export function formatMin(min: number): string {
 export function errorMessage(error: unknown, fallback: string): string {
   return error instanceof RakushifuError ? error.message : fallback;
 }
+
+/** 1234 → "1,234" */
+export function formatYen(amount: number): string {
+  return amount.toLocaleString('ja-JP');
+}
