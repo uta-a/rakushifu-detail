@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Pressable } from 'react-native';
-import { Tabs } from 'expo-router';
-import { CalendarDays, ClipboardList, LogOut, Wallet } from 'lucide-react-native';
+import { Pressable, View } from 'react-native';
+import { Tabs, useRouter } from 'expo-router';
+import { CalendarDays, ClipboardList, LogOut, Settings, Wallet } from 'lucide-react-native';
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
 import { useAuth } from '@/lib/auth';
@@ -63,6 +63,21 @@ function LogoutButton() {
   );
 }
 
+function SettingsButton() {
+  const { colors } = useTheme();
+  const router = useRouter();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="設定（通知など）"
+      onPress={() => router.push('/settings')}
+      style={{ width: control.default, height: control.default, alignItems: 'center', justifyContent: 'center' }}
+    >
+      <Settings size={16} color={colors.mutedForeground} />
+    </Pressable>
+  );
+}
+
 // SDK 58 から、ここで宣言したルートだけがタブに出る
 function TabsNavigator() {
   const { colors } = useTheme();
@@ -75,7 +90,12 @@ function TabsNavigator() {
         headerShadowVisible: false,
         headerTintColor: colors.foreground,
         headerTitleStyle: { fontSize: fontSize.base, fontWeight: '600', letterSpacing: tightTracking(fontSize.base) },
-        headerRight: () => <LogoutButton />,
+        headerRight: () => (
+          <View style={{ flexDirection: 'row' }}>
+            <SettingsButton />
+            <LogoutButton />
+          </View>
+        ),
         tabBarStyle: { backgroundColor: colors.background, borderTopColor: colors.border },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.mutedForeground,

@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { createRakushifuClient, isUnauthorized, type RakushifuClient } from '@rakushifu/core';
-import { NativeJarSession } from './session';
+import { isUnauthorized, type RakushifuClient } from '@rakushifu/core';
+import { resetShiftNotifications, resumeShiftNotifications } from '@/notifications/control';
+import { client } from './client';
 import { clearCredentials, loadCredentials, saveCredentials } from './credentials';
 
 export type AuthStatus = 'loading' | 'signedIn' | 'signedOut';
@@ -25,9 +26,6 @@ class NoCredentialsError extends Error {
   }
 }
 
-// cookie は OS の jar に入るので、セッションもクライアントもアプリで1つでよい
-const client = createRakushifuClient(new NativeJarSession());
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [status, setStatus] = useState<AuthStatus>('loading');
@@ -43,6 +41,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(async () => {
     await clearCredentials();
+    // 次にログインする人に、前の人のシフトの差分や通知の設定を引き継がない
+    await resetShiftNotifications();
     queryClient.clear();
     setStatus('signedOut');
   }, [queryClient]);
@@ -50,6 +50,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = useCallback(async (employeeCode: string, password: string) => {
     await client.login(employeeCode, password);
     await saveCredentials({ employeeCode, password });
+    // 再ログインの失敗で止めていた通知を、ログインし直したら再開する
+    await resumeShiftNotifications();
     setStatus('signedIn');
   }, []);
 
