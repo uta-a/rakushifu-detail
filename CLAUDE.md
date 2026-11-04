@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 npm workspaces の monorepo。Web版は `apps/web`（`@rakushifu/web`）、UI から独立した型と純粋関数は `packages/core`（`@rakushifu/core`）にある。ルートのスクリプトは各 workspace に委譲する。
 
-core はビルドせず TS のまま `exports: ./src/index.ts` で公開している。core 内の相互 import には `.ts` 拡張子を付け、`erasableSyntaxOnly` を守る（enum を使わない）。DOM・Node・React Native 固有の API には依存させない（`tsconfig.json` の `lib` は ES2023 のみ）。
+core の `exports` は条件で分けている。Vite・Vitest・tsc（Metro も）は `source` 条件で `src/index.ts` を直接読み、Node（Vercel Functions）は `tsc -p tsconfig.build.json` で出した `dist/` を読む。Vercel は依存先の TS をコンパイルしても import の `.ts` を書き換えないため、src のままでは本番の関数が起動しない。`vercel.json` の `buildCommand` で core を先にビルドしている。ローカルで `vercel dev` を使う前にも `npm run build -w @rakushifu/core` が要る。core 内の相互 import には `.ts` 拡張子を付け（ビルド時に `.js` へ書き換わる）、`erasableSyntaxOnly` を守る（enum を使わない）。DOM・Node・React Native 固有の API には依存させない（`tsconfig.json` の `lib` は ES2023 のみ）。
 
 ```bash
 npm run dev          # Vite開発サーバー起動
@@ -26,6 +26,7 @@ npm test -w @rakushifu/core -- src/utils/salaryCalculator.test.ts   # 単一テ�
 ローカルで API 込みの動作確認をするには、2つのプロセスを並行して起動する。
 
 ```bash
+npm run build -w @rakushifu/core              # api/ が読む core の dist を作る
 cd apps/web && npx vercel dev --listen 3001   # api/ の Serverless Functions（ポートは固定）
 npm run dev                    # フロント。/api/* は 3001 にプロキシされる
 ```
@@ -38,10 +39,12 @@ npm run dev                    # フロント。/api/* は 3001 にプロキシ�
 
 らくしふには公式APIキーがないため、ブラウザのログインフローを Serverless Function で代行している。CORSとクレデンシャルの都合上、フロントから直接らくしふを叩けないため、必ず `api/` のプロキシ経由になる。
 
-1. `api/login.ts` — 従業員ID/パスワードを受け取り、(1) らくしふ認証API（`api.accounts.rakushifu.com`）でログインして `xbit_at` 等のcookieを取得、(2) enterpriseドメインでセッションを確立し、統合したcookie文字列をフロントに返す。
+らくしふへの手順そのものは `packages/core/src/api/client.ts`（`createRakushifuClient`）にあり、Web版と Android版で共有する。`api/*.ts` は「入力検証 → `CookieSession` を作る → クライアントを呼ぶ → `RakushifuError` を HTTP ステータスに戻す（`api/_lib/http.ts`）」だけの薄い層。cookie とリダイレクトの扱いは `RakushifuSession` の実装で差し替える（Web版は cookie 文字列を自前で持ち、リダイレクトを追わない `CookieSession`）。`api/` 内の相対 import は Node の ESM で解決できるよう `.js` で書く。
+
+1. `api/login.ts` — 従業員ID/パスワードを受け取り、クライアントの `login` で(1) らくしふ認証API（`api.accounts.rakushifu.com`）でログインして `xbit_at` 等のcookieを取得、(2) enterpriseドメインでセッションを確立し、統合したcookie文字列をフロントに返す。
 2. フロントは受け取ったcookie文字列を `sessionStorage`（キー `rakushifu-cookies`）に保存。`App.tsx` はこのキーの有無でログイン状態を判定する。
 3. `useShifts` フックがシフト取得時、cookieを `X-Rakushifu-Cookies` ヘッダーに載せて `/api/shifts` を呼ぶ。
-4. `api/shifts.ts` — cookieを使って `skylark.enterprise.rakushifu.com` の確定シフトAPIを叩き、レスポンスをそのまま返す。ブラウザ由来のリクエストに見せるため User-Agent / Referer を偽装している。
+4. `api/shifts.ts` — cookieを使って `skylark.enterprise.rakushifu.com` の確定シフトAPIを叩き、レスポンスをそのまま返す。ブラウザ由来のリクエストに見せるため、クライアントが User-Agent / Referer を偽装している。
 
 cookie はサーバーに保存せずフロントの sessionStorage のみで保持し、リクエストごとにヘッダーで渡す構造。認証情報を扱うため `api/` の入力バリデーション（型・長さチェック）は維持すること。
 
@@ -55,7 +58,7 @@ cookie はサーバーに保存せずフロントの sessionStorage のみで保
 
 **upsert は期間を丸ごと置き換える。** 期間内の全日付を送る必要があり、希望を出さない日は `desired_schedule: null` を送る。日を落とすと、その日の提出済みの希望が消える。`toUpsertPayload`（`packages/core/src/utils/shiftSubmit.ts`）がこの不変条件を担保しているので、ここを変えるときはテストを必ず見ること。
 
-**CSRF が必要。** らくしふの更新系は Rails の CSRF 保護下にあり、提出ページの HTML に埋め込まれた `data-csrf-token` を `X-CSRF-Token` で送る。トークンはセッションと対なので、`api/submit-shifts.ts` は「提出ページを GET → トークン抽出 → その GET で回転した `_Rakushifu_session` に差し替えて POST」する。既存の `api/` で唯一の更新系なので、`req.body` はそのまま中継せず、許可キーだけを検証して詰め替えている。
+**CSRF が必要。** らくしふの更新系は Rails の CSRF 保護下にあり、提出ページの HTML に埋め込まれた `data-csrf-token` を `X-CSRF-Token` で送る。トークンはセッションと対なので、クライアントの `submitShifts` は「提出ページを GET → トークン抽出 → その GET で回転した `_Rakushifu_session` で POST」する（差し替えはセッション側が Set-Cookie を取り込んで行う）。唯一の更新系なので、受け取った値はそのまま中継せず、`sanitizeShifts`（`packages/core/src/api/sanitize.ts`）で許可キーだけを検証して詰め替えている。
 
 **初期値を入れるのは未提出の期間だけ。** 公式は未提出の期間に限り、勤務可能時間帯（無ければ基本シフト）を店舗の入力可能範囲でクランプしたものを既定値として全日に入れる。提出済みの期間では空欄のままにする。ここを取り違えると、希望を出さないことにした日が出勤希望として復活する。
 
@@ -95,6 +98,6 @@ cookie はサーバーに保存せずフロントの sessionStorage のみで保
 
 ## 注意点
 
-- らくしふの非公開APIに依存しているため、エンドポイントやcookie名（`xbit_at`）、レスポンス構造が変わると壊れる。`api/` を触るときはらくしふ側の仕様変更を疑う。
+- らくしふの非公開APIに依存しているため、エンドポイントやcookie名（`xbit_at`）、レスポンス構造が変わると壊れる。`api/` や `packages/core/src/api/` を触るときはらくしふ側の仕様変更を疑う。
 - 提出の CSRF トークンは提出ページの HTML をスクレイピングして取っている。マークアップが変わると壊れるので、取得できなかった場合は専用の文言（「提出トークンの取得に失敗しました」）で 502 を返し、他の失敗と切り分けられるようにしてある。
 - `vercel.json` にCSP等のセキュリティヘッダーを設定済み。`connect-src 'self'` のため外部への直接fetchは不可（プロキシ前提の制約）。フロントで外部リソースを増やす場合はCSPも更新する。
