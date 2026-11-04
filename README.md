@@ -39,6 +39,7 @@ npm run dev
 `npm run dev` はフロントのみ。らくしふへのログインを含む `/api/*` を動かすには、別のターミナルで Serverless Functions を起動する。
 
 ```bash
+npm run build -w @rakushifu/core   # api/ が読む packages/core の dist を作る
 cd apps/web
 npx vercel dev --listen 3001
 ```

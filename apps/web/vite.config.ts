@@ -1,9 +1,14 @@
 import { defineConfig } from 'vitest/config'
+import { defaultClientConditions } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  resolve: {
+    // @rakushifu/core を dist ではなく src の TS から読む（packages/core/package.json の exports）
+    conditions: ['source', ...defaultClientConditions],
+  },
   server: {
     proxy: {
       // API だけ `npx vercel dev --listen 3001` の Serverless Functions に転送する。

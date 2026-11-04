@@ -1,0 +1,16 @@
+{
+  // Node（Vercel Functions）が読む JS を dist に出す。Vite・Vitest・Metro は
+  // package.json の "source" 条件で src の TS を直接読むので、これを使わない。
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "allowImportingTsExtensions": false,
+    // core 内の './x.ts' を出力では './x.js' に書き換える
+    "rewriteRelativeImportExtensions": true,
+    "declaration": true,
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts"]
+}

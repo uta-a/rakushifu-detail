@@ -1,22 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-
-const BASE_URL = 'https://skylark.enterprise.rakushifu.com';
-
-// この店舗で扱う職種(genre)。フロア=2, キッチン=3。
-const GENRE_IDS = [2, 3];
-
-interface SharedSchedule {
-  user_id: number;
-  attending_genre_id: number;
-  start_as_min: number | null;
-  end_as_min: number | null;
-  off: boolean;
-}
-
-interface StoreUser {
-  id: number;
-  name: string;
-}
+import { createRakushifuClient } from '@rakushifu/core';
+import { createSession, readCookies, sendError } from './_lib/http.js';
 
 /**
  * 店舗の指定日シフト（フロア/キッチン・出勤のみ）を、個人情報を絞って返すプロキシ。
@@ -37,72 +21,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: '有効な date (YYYY-MM-DD) を指定してください' });
   }
 
-  const cookies = req.headers['x-rakushifu-cookies'] as string;
-  if (!cookies || cookies.length > 10000) {
+  const cookies = readCookies(req);
+  if (!cookies) {
     return res.status(401).json({ error: 'ログインしてください' });
   }
 
-  const commonHeaders = {
-    Accept: 'application/json, text/plain, */*',
-    Cookie: cookies,
-    'User-Agent':
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    Referer: `${BASE_URL}/staff/v2/schedules/confirmed`,
-  };
-
-  const genreQuery = GENRE_IDS.map((g) => `genre_ids[]=${g}`).join('&');
-  const shiftUrl =
-    `${BASE_URL}/ajax/admin/v2/schedules?page_ctx_name=staff&store_id=${storeId}` +
-    `&${genreQuery}&start_date=${date}&end_date=${date}&is_staff_print_page=false`;
-
   try {
-    // 自分の user_id と店舗の指定日シフトは互いに依存しないので同時に取る。
-    // 直列にすると日付を選ぶたびに往復が倍になり、体感がそのまま遅くなる。
-    const [orgRes, shiftRes] = await Promise.all([
-      fetch(`${BASE_URL}/ajax/organizations`, { headers: commonHeaders }),
-      fetch(shiftUrl, { headers: commonHeaders }),
-    ]);
-
-    if (orgRes.status === 401 || shiftRes.status === 401) {
-      return res.status(401).json({ error: 'ログインしてください' });
-    }
-    if (!orgRes.ok) {
-      return res.status(orgRes.status).json({ error: 'ユーザー情報の取得に失敗しました' });
-    }
-    if (!shiftRes.ok) {
-      return res.status(shiftRes.status).json({ error: 'シフトデータの取得に失敗しました' });
-    }
-
-    const [org, data] = await Promise.all([orgRes.json(), shiftRes.json()]);
-    const selfUserId = org?.current_user?.id;
-    if (typeof selfUserId !== 'number') {
-      return res.status(502).json({ error: 'ユーザー情報の解析に失敗しました' });
-    }
-
-    const nameById = new Map<number, string>(
-      (data.users as StoreUser[] | undefined)?.map((u) => [u.id, u.name]) ?? []
-    );
-
-    // 出勤・フロア/キッチン・時刻ありのシフトだけを、個人情報を落として抽出
-    const members = ((data.shared as SharedSchedule[] | undefined) ?? [])
-      .filter(
-        (s) =>
-          !s.off &&
-          GENRE_IDS.includes(s.attending_genre_id) &&
-          typeof s.start_as_min === 'number' &&
-          typeof s.end_as_min === 'number' &&
-          nameById.has(s.user_id)
-      )
-      .map((s) => ({
-        userId: s.user_id,
-        name: nameById.get(s.user_id)!,
-        genreId: s.attending_genre_id,
-        startAsMin: s.start_as_min as number,
-        endAsMin: s.end_as_min as number,
-      }));
-
-    return res.status(200).json({ selfUserId, date, members });
-  } catch {
-    return res.status(500).json({ error: 'シフトデータの取得でエラーが発生しました' });
+    const data = await createRakushifuClient(createSession(cookies)).getStoreShifts(storeId, date);
+    return res.status(200).json(data);
+  } catch (error) {
+    return sendError(res, error, 'Fetch store shifts error');
   }
 }
