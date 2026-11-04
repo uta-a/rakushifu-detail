@@ -39,6 +39,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "0dde2a51-62d7-4dc6-a3b6-fe55d62d0e6d"
+      }
+    },
+    "owner": "uta_a"
   }
 }
