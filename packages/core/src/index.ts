@@ -4,3 +4,7 @@ export * from './utils/date.ts';
 export * from './utils/overlap.ts';
 export * from './utils/salaryCalculator.ts';
 export * from './utils/shiftSubmit.ts';
+export * from './api/errors.ts';
+export * from './api/session.ts';
+export * from './api/sanitize.ts';
+export * from './api/client.ts';
