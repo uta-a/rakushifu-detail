@@ -202,6 +202,11 @@ Radix が必要になるほど複雑な要件（複数レイヤーの Dialog、�
 - タイポの階層は `Text` の `variant`（hero / heading / title / cardTitle / body / caption）で選ぶ。
   `.tabular` は `tabular` プロップ（`fontVariant: ['tabular-nums']`）。
 - プリミティブは `src/components/ui/`。Web と同じく、新しい見た目は画面側で組まずここに足す。
+  Web の `<select>` と Popover は無いので、`Select`（選択肢をダイアログで出す）と `Dialog` で代える。
+- 意味色（work / late-night / transport / floor / kitchen / sunday / saturday）は `Text` の `tone` で当てる。
+  使ってよい箇所は Web版で同じトークンを当てている箇所だけ。
+- 横幅の都合で Web と構成を変えてよい。給与計算のシフト表は日付と時間を1列目に縦に積んで4列、
+  シフト管理の1日の行は「日付・希望・メモ」と「時刻」の2段にしている。
 - フォント（Inter / Noto Sans JP）はまだ入れておらず、端末の既定フォントで表示している。
 
 ## 画面が共有しなければならないもの
