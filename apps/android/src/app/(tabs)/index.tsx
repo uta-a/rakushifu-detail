@@ -1,63 +1,63 @@
-import { View } from 'react-native';
-import { RakushifuError, calcShiftDetail } from '@rakushifu/core';
+import { useMemo, useState } from 'react';
+import { buildShiftsByDate, defaultSelectedDate, shiftMonth, toDateString } from '@rakushifu/core';
 import { useConfirmedShifts } from '@/hooks/useConfirmedShifts';
+import { CalendarDayDetail } from '@/components/calendar/CalendarDayDetail';
+import { CalendarGrid } from '@/components/calendar/CalendarGrid';
+import { DayOverlap } from '@/components/calendar/DayOverlap';
+import { MonthNav } from '@/components/MonthNav';
 import { Screen } from '@/components/Screen';
 import { Alert } from '@/components/ui/alert';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
-import { Text } from '@/components/ui/text';
+import { Card, CardContent } from '@/components/ui/card';
+import { errorMessage } from '@/lib/format';
 import { space } from '@/theme/tokens';
 
-/**
- * 雛形: 今月の確定シフトを一覧で出すだけ。core のクライアントと純粋関数が
- * 端末から通ることを確かめるための画面で、月グリッドなどは後で作る。
- */
+/** 月グリッド + 選択日の詳細 + その日のかぶり（Web版の ShiftCalendar） */
 export default function CalendarScreen() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
+  const [{ year, month }, setYearMonth] = useState(() => {
+    const now = new Date();
+    return { year: now.getFullYear(), month: now.getMonth() + 1 };
+  });
+  const [selectedDate, setSelectedDate] = useState(() => defaultSelectedDate(year, month, new Date()));
   const { data, error, isPending } = useConfirmedShifts(year, month);
+
+  const handleMove = (delta: number) => {
+    const next = shiftMonth(year, month, delta);
+    setYearMonth(next);
+    setSelectedDate(defaultSelectedDate(next.year, next.month, new Date()));
+  };
+
+  const shiftsByDate = useMemo(() => buildShiftsByDate(data ?? []), [data]);
+  const todayDate = toDateString(new Date());
+
+  // かぶりを出すのは出勤する日だけ。店舗はその日のシフトから取れるので再取得も要らない
+  const selectedWorkShift = shiftsByDate.get(selectedDate)?.find((entry) => !entry.detail.isOff);
+  const overlapStoreId = selectedWorkShift ? selectedWorkShift.schedule.attending_store_id : null;
 
   return (
     <Screen>
-      <Text variant="heading" tabular>
-        {year}年{month}月
-      </Text>
-
-      {error ? (
-        <Alert variant="destructive">
-          {error instanceof RakushifuError ? error.message : 'シフトデータの取得でエラーが発生しました'}
-        </Alert>
-      ) : null}
-
       <Card>
-        <CardHeader>
-          <CardTitle>確定シフト</CardTitle>
-        </CardHeader>
-        <CardContent padding="below-header" style={{ gap: space[3] }}>
-          {isPending ? (
-            <SkeletonGroup label="確定シフトを読み込み中">
-              <Skeleton height={20} />
-              <Skeleton height={20} />
-              <Skeleton height={20} width="60%" />
-            </SkeletonGroup>
-          ) : data && data.length > 0 ? (
-            data.map((schedule) => {
-              const detail = calcShiftDetail(schedule);
-              return (
-                <View key={schedule.id} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                  <Text tabular>{schedule.date}</Text>
-                  <Text tabular tone={schedule.off ? 'muted' : 'default'}>
-                    {schedule.off ? '休み' : `${detail.startTime}〜${detail.endTime}`}
-                  </Text>
-                </View>
-              );
-            })
-          ) : (
-            <Text tone="muted">今月の確定シフトはまだありません</Text>
-          )}
+        {/* カレンダーだけ余白を詰める（Web の p-2） */}
+        <CardContent padding="none" style={{ padding: space[2], gap: space[1] }}>
+          <MonthNav year={year} month={month} onMove={handleMove} />
+          <CalendarGrid
+            year={year}
+            month={month}
+            shiftsByDate={shiftsByDate}
+            selectedDate={selectedDate}
+            todayDate={todayDate}
+            onSelectDate={setSelectedDate}
+          />
         </CardContent>
       </Card>
+
+      {error ? (
+        <Alert variant="destructive">{errorMessage(error, 'シフトデータの取得でエラーが発生しました')}</Alert>
+      ) : (
+        <>
+          <CalendarDayDetail date={selectedDate} shifts={shiftsByDate.get(selectedDate) ?? []} loading={isPending} />
+          <DayOverlap date={selectedDate} storeId={overlapStoreId} />
+        </>
+      )}
     </Screen>
   );
 }

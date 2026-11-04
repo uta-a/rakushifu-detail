@@ -30,7 +30,7 @@ export function CardTitle({ children }: { children: string }) {
   );
 }
 
-/** padding は Web の CardContent と同じ3択。style で padding を渡さないこと */
+/** padding は Web の CardContent と同じ3択。ほかの値にするときは none にして style で渡す */
 export function CardContent({
   padding = 'default',
   style,
