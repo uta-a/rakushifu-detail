@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 npm workspaces の monorepo。Web版は `apps/web`（`@rakushifu/web`）、Android版は `apps/android`（`@rakushifu/android`、Expo）、UI から独立した型と純粋関数とらくしふクライアントは `packages/core`（`@rakushifu/core`）にある。ルートのスクリプトは各 workspace に委譲する。
 
-core の `exports` は条件で分けている。Vite・Vitest・tsc（Metro も）は `source` 条件で `src/index.ts` を直接読み、Node（Vercel Functions）は `tsc -p tsconfig.build.json` で出した `dist/` を読む。Vercel は依存先の TS をコンパイルしても import の `.ts` を書き換えないため、src のままでは本番の関数が起動しない。`vercel.json` の `buildCommand` で core を先にビルドしている。ローカルで `vercel dev` を使う前にも `npm run build -w @rakushifu/core` が要る。core 内の相互 import には `.ts` 拡張子を付け（ビルド時に `.js` へ書き換わる）、`erasableSyntaxOnly` を守る（enum を使わない）。DOM・Node・React Native 固有の API には依存させない（`tsconfig.json` の `lib` は ES2023 のみ）。
+core の `exports` は条件で分けている。Vite・Vitest・tsc（Metro も）は `rakushifu-source` 条件で `src/index.ts` を直接読み（条件名を `source` のような一般的な名前にすると、同名の条件を exports に持つ他のパッケージまで未ビルドのソースに解決されるため、専用の名前にしている）、Node（Vercel Functions）は `tsc -p tsconfig.build.json` で出した `dist/` を読む。Vercel は依存先の TS をコンパイルしても import の `.ts` を書き換えないため、src のままでは本番の関数が起動しない。`vercel.json` の `buildCommand` で core を先にビルドしている。ローカルで `vercel dev` を使う前にも `npm run build -w @rakushifu/core` が要る。core 内の相互 import には `.ts` 拡張子を付け（ビルド時に `.js` へ書き換わる）、`erasableSyntaxOnly` を守る（enum を使わない）。DOM・Node・React Native 固有の API には依存させない（`tsconfig.json` の `lib` は ES2023 のみ）。
 
 ```bash
 npm run dev          # Vite開発サーバー起動
@@ -108,7 +108,7 @@ cookie はサーバーに保存せずフロントの sessionStorage のみで保
 - 従業員ID・パスワードは `expo-secure-store` だけに保存する（AsyncStorage やログに書かない、`allowBackup: false`）。らくしふの取得は必ず `useAuth().call` を通す。401 のときに保存した認証情報で一度だけ再ログインし、それでも 401 ならログイン画面へ戻す。
 - ルートは `src/app`。認証の出し分けは `_layout.tsx` の `Stack.Protected`、タブは `(tabs)/_layout.tsx` で宣言したものだけが出る（SDK 58 の仕様）。
 - スタイルは NativeWind を使わず StyleSheet。色は `src/theme/colors.ts`（`apps/web/src/index.css` の OKLCH から `npm run gen:theme -w @rakushifu/android` で生成。手で書き換えない）、余白・角丸・文字サイズは `src/theme/tokens.ts`。画面は `src/components/ui/` のプリミティブと `Text` の `variant` だけを使い、生の色値や数値を書かない。
-- Metro は `metro.config.js` で `source` 条件を足し、core を src の TS から読む（dist 不要）。monorepo の他の設定は expo/metro-config が自動で行う。
+- Metro は `metro.config.js`（eslint は `eslint.config.js`）で `rakushifu-source` 条件を足し、core を src の TS から読む（dist 不要）。monorepo の他の設定は expo/metro-config が自動で行う。
 
 ## 注意点
 

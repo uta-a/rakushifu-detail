@@ -10,8 +10,8 @@
 
     /* Bundler mode */
     "moduleResolution": "bundler",
-    // @rakushifu/core は "source" 条件で src の TS を指す（dist はビルドしなくてよい）
-    "customConditions": ["source"],
+    // @rakushifu/core は "rakushifu-source" 条件で src の TS を指す（dist はビルドしなくてよい）
+    "customConditions": ["rakushifu-source"],
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
