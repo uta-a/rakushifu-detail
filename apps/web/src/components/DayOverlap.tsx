@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { AlertCircle, ChefHat, UtensilsCrossed } from 'lucide-react';
 import { useOverlap } from '../hooks/useOverlap';
-import type { OverlapEntry } from '../types/shift';
+import type { OverlapEntry } from '@rakushifu/core';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Alert, AlertDescription } from './ui/alert';
 import { Badge } from './ui/badge';

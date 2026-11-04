@@ -7,9 +7,9 @@ import {
   getDayMark,
   formatMonthDayWithWeekday,
   defaultSelectedDate,
-} from './calendar';
-import { parseShiftDate } from './date';
-import type { Schedule } from '../types/shift';
+} from './calendar.ts';
+import { parseShiftDate } from './date.ts';
+import type { Schedule } from '../types/shift.ts';
 
 function schedule(o: Partial<Schedule> & { id: number; date: string }): Schedule {
   return {

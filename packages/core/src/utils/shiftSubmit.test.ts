@@ -12,8 +12,8 @@ import {
   selectableRange,
   timeOptions,
   toUpsertPayload,
-} from './shiftSubmit';
-import { OFF_TYPE } from '../types/shift';
+} from './shiftSubmit.ts';
+import { OFF_TYPE } from '../types/shift.ts';
 import type {
   AcceptableWorkingTime,
   BasicShift,
@@ -21,7 +21,7 @@ import type {
   DesiredSchedule,
   SubmitTerm,
   SubmittableStore,
-} from '../types/shift';
+} from '../types/shift.ts';
 
 /** 実店舗から観測した設定値（5分刻み・8時〜24時）に合わせたもの */
 const STORE: Pick<SubmittableStore, 'min_hour' | 'max_hour' | 'interval_minute'> = {

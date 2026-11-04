@@ -1,4 +1,4 @@
-import type { StoreShiftsResponse, OverlapEntry, OverlapResult } from '../types/shift';
+import type { StoreShiftsResponse, OverlapEntry, OverlapResult } from '../types/shift.ts';
 
 /** らくしふの職種(genre)ID。この店舗ではフロア/キッチンのみ扱う */
 export const GENRE = { FLOOR: 2, KITCHEN: 3 } as const;

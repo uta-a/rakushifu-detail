@@ -8,8 +8,8 @@ import { MonthNav } from '../components/MonthNav';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { Skeleton, SkeletonGroup } from '../components/ui/skeleton';
-import { calcMonthlySalary } from '../utils/salaryCalculator';
-import type { SalarySettings } from '../types/shift';
+import type { SalarySettings } from '@rakushifu/core';
+import { calcMonthlySalary } from '@rakushifu/core';
 
 interface DashboardProps {
   onSessionExpired: () => void;

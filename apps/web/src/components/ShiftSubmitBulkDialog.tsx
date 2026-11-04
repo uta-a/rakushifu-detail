@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import type { DayKind } from '../types/shift';
-import type { BulkRule, TimeRange } from '../utils/shiftSubmit';
-import { formatAsMin } from '../utils/shiftSubmit';
-import { WEEKDAY_LABELS } from '../utils/calendar';
+import type { DayKind, BulkRule, TimeRange } from '@rakushifu/core';
+import { formatAsMin, WEEKDAY_LABELS } from '@rakushifu/core';
 import { cn } from '../lib/cn';
 import { Button } from './ui/button';
 import { Dialog } from './ui/dialog';

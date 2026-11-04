@@ -1,4 +1,4 @@
-import type { Schedule, ShiftDetail, SalaryResult, SalarySettings } from '../types/shift';
+import type { Schedule, ShiftDetail, SalaryResult, SalarySettings } from '../types/shift.ts';
 
 const LATE_NIGHT_START = 22; // 22:00
 const LATE_NIGHT_END = 5; // 05:00

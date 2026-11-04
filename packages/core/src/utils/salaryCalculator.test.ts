@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { calcLateNightMinutes, calcShiftDetail, calcMonthlySalary } from './salaryCalculator';
-import type { Schedule } from '../types/shift';
+import { calcLateNightMinutes, calcShiftDetail, calcMonthlySalary } from './salaryCalculator.ts';
+import type { Schedule } from '../types/shift.ts';
 
 function makeSchedule(overrides: Partial<Schedule> = {}): Schedule {
   return {

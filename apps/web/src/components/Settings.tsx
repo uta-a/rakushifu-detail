@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Settings2 } from 'lucide-react';
-import type { SalarySettings } from '../types/shift';
+import type { SalarySettings } from '@rakushifu/core';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';

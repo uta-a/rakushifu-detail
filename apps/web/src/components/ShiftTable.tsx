@@ -1,5 +1,5 @@
-import type { ShiftDetail } from '../types/shift';
-import { parseShiftDate } from '../utils/date';
+import type { ShiftDetail } from '@rakushifu/core';
+import { parseShiftDate } from '@rakushifu/core';
 import { cn } from '../lib/cn';
 
 interface ShiftTableProps {

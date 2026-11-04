@@ -1,4 +1,4 @@
-import type { SalaryResult } from '../types/shift';
+import type { SalaryResult } from '@rakushifu/core';
 import { Card, CardContent, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { cn } from '../lib/cn';
