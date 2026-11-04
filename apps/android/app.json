@@ -12,6 +12,7 @@
     ],
     "android": {
       "package": "com.utaa.rakushifu",
+      "versionCode": 1,
       "allowBackup": false,
       "adaptiveIcon": {
         "backgroundColor": "#ffffff",
