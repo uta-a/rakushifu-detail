@@ -108,6 +108,8 @@ cookie はサーバーに保存せずフロントの sessionStorage のみで保
 - 従業員ID・パスワードは `expo-secure-store` だけに保存する（AsyncStorage やログに書かない、`allowBackup: false`）。らくしふの取得は必ず `useAuth().call` を通す。401 のときに保存した認証情報で一度だけ再ログインし、それでも 401 ならログイン画面へ戻す。
 - ルートは `src/app`。認証の出し分けは `_layout.tsx` の `Stack.Protected`、タブは `(tabs)/_layout.tsx` で宣言したものだけが出る（SDK 58 の仕様）。
 - スタイルは NativeWind を使わず StyleSheet。色は `src/theme/colors.ts`（`apps/web/src/index.css` の OKLCH から `npm run gen:theme -w @rakushifu/android` で生成。手で書き換えない）、余白・角丸・文字サイズは `src/theme/tokens.ts`。画面は `src/components/ui/` のプリミティブと `Text` の `variant` だけを使い、生の色値や数値を書かない。
+- 画面は Web版と同じ3タブ（`(tabs)/index.tsx` カレンダー、`salary.tsx` 給与計算、`submit.tsx` シフト管理）。取得は `src/hooks/` の TanStack Query（キーは `['confirmed', y, m]`・`['store-shifts', storeId, date]`・`['submit-context']`・`['desired', start, end]`）。提出は mutation で、成功したら `submit-context` と `desired` を無効化する。提出画面は取り直しで編集中の内容を上書きしない。
+- Web版と違い、シフト管理に未提出の変更があってもタブ移動は引き止めない（Android のタブは移っても画面が残り、編集内容も消えないため）。代わりにタブに点を出し、内容が消えるログアウトだけを確認する（`src/lib/unsavedChanges.tsx`）。
 - Metro は `metro.config.js`（eslint は `eslint.config.js`）で `rakushifu-source` 条件を足し、core を src の TS から読む（dist 不要）。monorepo の他の設定は expo/metro-config が自動で行う。
 
 ## 注意点
