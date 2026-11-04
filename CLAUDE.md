@@ -111,6 +111,10 @@ cookie はサーバーに保存せずフロントの sessionStorage のみで保
 - 画面は Web版と同じ3タブ（`(tabs)/index.tsx` カレンダー、`salary.tsx` 給与計算、`submit.tsx` シフト管理）。取得は `src/hooks/` の TanStack Query（キーは `['confirmed', y, m]`・`['store-shifts', storeId, date]`・`['submit-context']`・`['desired', start, end]`）。提出は mutation で、成功したら `submit-context` と `desired` を無効化する。提出画面は取り直しで編集中の内容を上書きしない。
 - Web版と違い、シフト管理に未提出の変更があってもタブ移動は引き止めない（Android のタブは移っても画面が残り、編集内容も消えないため）。代わりにタブに点を出し、内容が消えるログアウトだけを確認する（`src/lib/unsavedChanges.tsx`）。
 - Metro は `metro.config.js`（eslint は `eslint.config.js`）で `rakushifu-source` 条件を足し、core を src の TS から読む（dist 不要）。monorepo の他の設定は expo/metro-config が自動で行う。
+- APK は EAS のローカルビルドで作る（`apps/android` で `npx eas-cli@latest build --local -p android --profile preview --output dist/rakushifu-preview.apk`）。クラウドのビルドは無料枠の順番待ちが長いため使っていない。Java 17 以上と Android SDK・NDK、`ANDROID_HOME` が要る。出力先の `dist/` は git に入れない。
+- 署名鍵は EAS（プロジェクト `@uta_a/rakushifu-detail`）が保管し、ローカルビルドもそれを取ってきて使う。鍵が変わると既存のインストールを上書き更新できなくなるので、鍵を作り直さないこと。
+- preview は実機向けの arm64-v8a だけを入れる（`eas.json` の `env` で `reactNativeArchitectures` を指定）。エミュレータで動かすときは開発サーバー（Expo Go）を使う。
+- 配布用に出すときは `app.json` の `version` と `android.versionCode` を上げる（`appVersionSource: local`）。versionCode が同じか小さいと上書きインストールできない。
 
 ## 注意点
 
