@@ -1,6 +1,6 @@
 {
   // Node（Vercel Functions）が読む JS を dist に出す。Vite・Vitest・Metro は
-  // package.json の "source" 条件で src の TS を直接読むので、これを使わない。
+  // package.json の "rakushifu-source" 条件で src の TS を直接読むので、これを使わない。
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": false,

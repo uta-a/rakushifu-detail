@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     // @rakushifu/core を dist ではなく src の TS から読む（packages/core/package.json の exports）
-    conditions: ['source', ...defaultClientConditions],
+    conditions: ['rakushifu-source', ...defaultClientConditions],
   },
   server: {
     proxy: {
