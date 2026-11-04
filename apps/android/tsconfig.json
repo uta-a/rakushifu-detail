@@ -1,0 +1,14 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    // @rakushifu/core は "source" 条件で src の TS を指す（dist をビルドしなくてよい）
+    "customConditions": ["source"],
+    // core の相互 import が ./x.ts 形式なので許可する（Metro は拡張子付きのまま解決できる）
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
+}

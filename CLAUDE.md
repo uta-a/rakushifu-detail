@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## コマンド
 
-npm workspaces の monorepo。Web版は `apps/web`（`@rakushifu/web`）、UI から独立した型と純粋関数は `packages/core`（`@rakushifu/core`）にある。ルートのスクリプトは各 workspace に委譲する。
+npm workspaces の monorepo。Web版は `apps/web`（`@rakushifu/web`）、Android版は `apps/android`（`@rakushifu/android`、Expo）、UI から独立した型と純粋関数とらくしふクライアントは `packages/core`（`@rakushifu/core`）にある。ルートのスクリプトは各 workspace に委譲する。
 
 core の `exports` は条件で分けている。Vite・Vitest・tsc（Metro も）は `source` 条件で `src/index.ts` を直接読み、Node（Vercel Functions）は `tsc -p tsconfig.build.json` で出した `dist/` を読む。Vercel は依存先の TS をコンパイルしても import の `.ts` を書き換えないため、src のままでは本番の関数が起動しない。`vercel.json` の `buildCommand` で core を先にビルドしている。ローカルで `vercel dev` を使う前にも `npm run build -w @rakushifu/core` が要る。core 内の相互 import には `.ts` 拡張子を付け（ビルド時に `.js` へ書き換わる）、`erasableSyntaxOnly` を守る（enum を使わない）。DOM・Node・React Native 固有の API には依存させない（`tsconfig.json` の `lib` は ES2023 のみ）。
 
@@ -19,7 +19,11 @@ npm run lint         # ESLint
 npm test             # Vitest（1回実行）
 npm run test:watch   # Vitest（watch）
 npm test -w @rakushifu/core -- src/utils/salaryCalculator.test.ts   # 単一テストファイル実行
+npm run android -w @rakushifu/android   # Expo の開発サーバー（Android）
+npm run doctor -w @rakushifu/android    # expo-doctor で依存と設定を診断
 ```
+
+**React は Web と Android で同じバージョンに固定する。** Expo の SDK は react を固定バージョンで要求し、npm workspaces で React が2つに割れるとフックが壊れる（Web のテストが大量に落ちる、バンドルが不自然に膨らむ）。`apps/web` の `react` / `react-dom` は Expo の SDK が要求する版ちょうどにしてあり、SDK を上げるときは両方を揃えて上げること。Android への依存追加は `npm install` ではなく `npx expo install`（`apps/android` で実行）を使い、SDK に合う版を入れる。
 
 デプロイは Vercel（`apps/web` で `npx vercel`）。Vercel の Root Directory は `apps/web`。
 
@@ -95,6 +99,16 @@ cookie はサーバーに保存せずフロントの sessionStorage のみで保
 - `pages/Dashboard.tsx` — 月切り替え・設定・シフト表・給料サマリを束ねる。年月stateが変わると `useEffect` で再取得。
 - 時給・交通費の設定（`Settings`）はブラウザに保存。デフォルトは時給1200円・交通費0円。
 - 型は `packages/core/src/types/shift.ts` に集約。らくしふAPIのレスポンス型（`ShiftApiResponse` 等）とアプリ内部型（`ShiftDetail`, `SalaryResult`）を分けている。
+
+### Android版
+
+`apps/android` は Expo SDK 58（expo-router、TanStack Query、expo-secure-store）。iOS・Web・Play ストア公開は対象外。
+
+- 端末から直接らくしふを叩く（Vercel を経由しない）。core のクライアントに `NativeJarSession`（`src/lib/session.ts`）を渡し、cookie は OS の cookie jar に任せる。RN の fetch では `redirect: 'manual'` が効かないため、セッション切れは最終 URL で判定する。
+- 従業員ID・パスワードは `expo-secure-store` だけに保存する（AsyncStorage やログに書かない、`allowBackup: false`）。らくしふの取得は必ず `useAuth().call` を通す。401 のときに保存した認証情報で一度だけ再ログインし、それでも 401 ならログイン画面へ戻す。
+- ルートは `src/app`。認証の出し分けは `_layout.tsx` の `Stack.Protected`、タブは `(tabs)/_layout.tsx` で宣言したものだけが出る（SDK 58 の仕様）。
+- スタイルは NativeWind を使わず StyleSheet。色は `src/theme/colors.ts`（`apps/web/src/index.css` の OKLCH から `npm run gen:theme -w @rakushifu/android` で生成。手で書き換えない）、余白・角丸・文字サイズは `src/theme/tokens.ts`。画面は `src/components/ui/` のプリミティブと `Text` の `variant` だけを使い、生の色値や数値を書かない。
+- Metro は `metro.config.js` で `source` 条件を足し、core を src の TS から読む（dist 不要）。monorepo の他の設定は expo/metro-config が自動で行う。
 
 ## 注意点
 
