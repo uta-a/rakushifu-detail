@@ -12,7 +12,19 @@ import { fontSize, tightTracking } from '@/theme/tokens';
  * - caption: 補足
  */
 export type TextVariant = 'hero' | 'heading' | 'title' | 'cardTitle' | 'body' | 'caption';
-export type TextTone = 'default' | 'muted' | 'destructive' | 'primaryForeground';
+export type TextTone =
+  | 'default'
+  | 'muted'
+  | 'destructive'
+  | 'primaryForeground'
+  // 意味トークン（--work 以下）。Web版で同じトークンを当てている箇所にだけ使う
+  | 'work'
+  | 'lateNight'
+  | 'floor'
+  | 'kitchen'
+  | 'transport'
+  | 'sunday'
+  | 'saturday';
 
 const variants: Record<TextVariant, TextStyle> = {
   hero: { fontSize: fontSize['4xl'], fontWeight: '600', letterSpacing: tightTracking(fontSize['4xl']) },
@@ -39,6 +51,13 @@ export function Text({ variant = 'body', tone, tabular, style, ...props }: TextP
     muted: colors.mutedForeground,
     destructive: colors.destructive,
     primaryForeground: colors.primaryForeground,
+    work: colors.work,
+    lateNight: colors.lateNight,
+    floor: colors.floor,
+    kitchen: colors.kitchen,
+    transport: colors.transport,
+    sunday: colors.sunday,
+    saturday: colors.saturday,
   }[resolvedTone];
 
   return (
