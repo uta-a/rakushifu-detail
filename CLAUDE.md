@@ -111,6 +111,8 @@ cookie はサーバーに保存せずフロントの sessionStorage のみで保
 - 画面は Web版と同じ3タブ（`(tabs)/index.tsx` カレンダー、`salary.tsx` 給与計算、`submit.tsx` シフト管理）。取得は `src/hooks/` の TanStack Query（キーは `['confirmed', y, m]`・`['store-shifts', storeId, date]`・`['submit-context']`・`['desired', start, end]`）。提出は mutation で、成功したら `submit-context` と `desired` を無効化する。提出画面は取り直しで編集中の内容を上書きしない。
 - Web版と違い、シフト管理に未提出の変更があってもタブ移動は引き止めない（Android のタブは移っても画面が残り、編集内容も消えないため）。代わりにタブに点を出し、内容が消えるログアウトだけを確認する（`src/lib/unsavedChanges.tsx`）。
 - Metro は `metro.config.js`（eslint は `eslint.config.js`）で `rakushifu-source` 条件を足し、core を src の TS から読む（dist 不要）。monorepo の他の設定は expo/metro-config が自動で行う。
+- 通知は端末内で完結させる（サーバーに認証情報を置かないため push は使わない）。`src/notifications/task.ts` の expo-background-task が約1時間おきに起き、今月・来月の確定シフトと提出期間を取って、前回のスナップショット（AsyncStorage）と core の `diffShiftSnapshots`（`packages/core/src/utils/shiftNotification.ts`）で比べ、差分をローカル通知にする。初回・過去の日・前回取っていない月は知らせない。締切の通知は未提出で24時間を切った期間に一度だけ。再ログインが 401 なら確認を止め（後ろで失敗し続けてロックされないように）、ログインし直すと再開する。ログアウトで全部消す。
+- 通知とバックグラウンドの確認は Expo Go では動かないので、APK を作って確かめる。設定画面（ヘッダーの歯車、`src/app/settings.tsx`）の「今すぐ確認」で同じ処理をすぐ走らせられる。
 - APK は EAS のローカルビルドで作る（`apps/android` で `npx eas-cli@latest build --local -p android --profile preview --output dist/rakushifu-preview.apk`）。クラウドのビルドは無料枠の順番待ちが長いため使っていない。Java 17 以上と Android SDK・NDK、`ANDROID_HOME` が要る。出力先の `dist/` は git に入れない。
 - 署名鍵は EAS（プロジェクト `@uta_a/rakushifu-detail`）が保管し、ローカルビルドもそれを取ってきて使う。鍵が変わると既存のインストールを上書き更新できなくなるので、鍵を作り直さないこと。
 - preview は実機向けの arm64-v8a だけを入れる（`eas.json` の `env` で `reactNativeArchitectures` を指定）。エミュレータで動かすときは開発サーバー（Expo Go）を使う。
