@@ -190,6 +190,20 @@ Radix が必要になるほど複雑な要件（複数レイヤーの Dialog、�
 フォーカストラップを手書きせずに済むため。Dialog の上に Dialog を重ねる要件が出たら、
 そのときに Radix を入れるか判断する。
 
+## Android版（apps/android）
+
+同じデザインシステムを React Native の StyleSheet で表現する。NativeWind は使わない
+（SDK 58 対応の安定版が無かったため。2026-11）。
+
+- 色は `apps/android/src/theme/colors.ts`。上の Theme の表（`src/index.css`）を
+  `npm run gen:theme -w @rakushifu/android` で sRGB に変換した生成ファイルで、手で書き換えない。
+  Web のトークンを変えたら作り直す。
+- 余白・角丸・タップ領域・文字サイズは `src/theme/tokens.ts`。角丸は `lg` / `md` / `full` の3段階。
+- タイポの階層は `Text` の `variant`（hero / heading / title / cardTitle / body / caption）で選ぶ。
+  `.tabular` は `tabular` プロップ（`fontVariant: ['tabular-nums']`）。
+- プリミティブは `src/components/ui/`。Web と同じく、新しい見た目は画面側で組まずここに足す。
+- フォント（Inter / Noto Sans JP）はまだ入れておらず、端末の既定フォントで表示している。
+
 ## 画面が共有しなければならないもの
 
 - ヘッダーの構造（タイトル + ThemeToggle + segmented control タブ）
