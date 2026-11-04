@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { DesiredSchedule, ShiftUpsertItem } from '../types/shift';
+import type { DesiredSchedule, ShiftUpsertItem } from '@rakushifu/core';
 
 /**
  * 提出済みの希望シフトの取得と、希望シフトの提出（upsert）。

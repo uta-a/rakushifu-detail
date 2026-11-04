@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
-import { calcOverlaps } from '../utils/overlap';
-import type { StoreShiftsResponse, OverlapResult } from '../types/shift';
+import type { StoreShiftsResponse, OverlapResult } from '@rakushifu/core';
+import { calcOverlaps } from '@rakushifu/core';
 
 /**
  * 指定日の「シフトかぶり」を取得するフック。

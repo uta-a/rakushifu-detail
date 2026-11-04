@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import type { CalendarShift, DayMark } from '../types/shift';
-import { buildMonthGrid, getDayMark, shiftMonth, WEEKDAY_LABELS } from '../utils/calendar';
+import type { CalendarShift, DayMark } from '@rakushifu/core';
+import { buildMonthGrid, getDayMark, shiftMonth, WEEKDAY_LABELS } from '@rakushifu/core';
 import { MonthNav } from './MonthNav';
 import { cn } from '../lib/cn';
 

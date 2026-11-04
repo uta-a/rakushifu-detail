@@ -1,6 +1,6 @@
 import { CalendarOff, Moon, StickyNote } from 'lucide-react';
-import type { CalendarShift } from '../types/shift';
-import { formatMonthDayWithWeekday } from '../utils/calendar';
+import type { CalendarShift } from '@rakushifu/core';
+import { formatMonthDayWithWeekday } from '@rakushifu/core';
 import { Card, CardContent } from './ui/card';
 import { Skeleton, SkeletonGroup } from './ui/skeleton';
 import { Badge } from './ui/badge';

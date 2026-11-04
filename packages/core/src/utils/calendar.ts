@@ -1,6 +1,6 @@
-import type { Schedule, CalendarCell, CalendarWeek, CalendarShift, DayMark } from '../types/shift';
-import { calcShiftDetail } from './salaryCalculator';
-import { parseShiftDate } from './date';
+import type { Schedule, CalendarCell, CalendarWeek, CalendarShift, DayMark } from '../types/shift.ts';
+import { calcShiftDetail } from './salaryCalculator.ts';
+import { parseShiftDate } from './date.ts';
 
 /** index が曜日（0=日 .. 6=土）に一致 */
 export const WEEKDAY_LABELS: readonly string[] = ['日', '月', '火', '水', '木', '金', '土'];

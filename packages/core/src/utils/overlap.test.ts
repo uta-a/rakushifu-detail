@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { calcOverlaps, GENRE } from './overlap';
-import type { StoreShiftsResponse, StoreShiftMember } from '../types/shift';
+import { calcOverlaps, GENRE } from './overlap.ts';
+import type { StoreShiftsResponse, StoreShiftMember } from '../types/shift.ts';
 
 function member(o: Partial<StoreShiftMember> & { userId: number }): StoreShiftMember {
   return {

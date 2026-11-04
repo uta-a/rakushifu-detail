@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseShiftDate } from './date';
+import { parseShiftDate } from './date.ts';
 
 describe('parseShiftDate', () => {
   it('YYYY-MM-DD をローカル日付として解釈する（タイムゾーン非依存）', () => {

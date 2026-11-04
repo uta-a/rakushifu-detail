@@ -8,10 +8,10 @@ import type {
   ShiftUpsertItem,
   SubmitTerm,
   SubmittableStore,
-} from '../types/shift';
-import { OFF_TYPE } from '../types/shift';
-import { parseShiftDate } from './date';
-import { toDateString } from './calendar';
+} from '../types/shift.ts';
+import { OFF_TYPE } from '../types/shift.ts';
+import { parseShiftDate } from './date.ts';
+import { toDateString } from './calendar.ts';
 
 /** 曜日ごとの時間帯。基本シフトと勤務可能時間帯で形が同じなので共通で扱う */
 type WeekdayTime = Pick<

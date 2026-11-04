@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { ShiftApiResponse, Schedule } from '../types/shift';
+import type { ShiftApiResponse, Schedule } from '@rakushifu/core';
 
 export function useShifts(onUnauthorized?: () => void) {
   const [schedules, setSchedules] = useState<Schedule[]>([]);

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { SubmitContextResponse } from '../types/shift';
+import type { SubmitContextResponse } from '@rakushifu/core';
 
 /** 希望シフト提出画面の初期コンテキスト（提出期間・店舗設定・初期値の元）を取る */
 export function useSubmitContext(onUnauthorized?: () => void) {

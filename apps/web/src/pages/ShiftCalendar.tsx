@@ -6,7 +6,7 @@ import { CalendarDayDetail, CALENDAR_DAY_DETAIL_HEADING_ID } from '../components
 import { DayOverlap } from '../components/DayOverlap';
 import { Card, CardContent } from '../components/ui/card';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { buildShiftsByDate, defaultSelectedDate, shiftMonth, toDateString } from '../utils/calendar';
+import { buildShiftsByDate, defaultSelectedDate, shiftMonth, toDateString } from '@rakushifu/core';
 
 interface ShiftCalendarProps {
   onSessionExpired: () => void;

@@ -8,7 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## コマンド
 
-npm workspaces の monorepo。Web版は `apps/web`（`@rakushifu/web`）にある。ルートのスクリプトは各 workspace に委譲する。
+npm workspaces の monorepo。Web版は `apps/web`（`@rakushifu/web`）、UI から独立した型と純粋関数は `packages/core`（`@rakushifu/core`）にある。ルートのスクリプトは各 workspace に委譲する。
+
+core はビルドせず TS のまま `exports: ./src/index.ts` で公開している。core 内の相互 import には `.ts` 拡張子を付け、`erasableSyntaxOnly` を守る（enum を使わない）。DOM・Node・React Native 固有の API には依存させない（`tsconfig.json` の `lib` は ES2023 のみ）。
 
 ```bash
 npm run dev          # Vite開発サーバー起動
@@ -16,7 +18,7 @@ npm run build        # tsc -b で型チェック後、vite build
 npm run lint         # ESLint
 npm test             # Vitest（1回実行）
 npm run test:watch   # Vitest（watch）
-npm test -w @rakushifu/web -- src/utils/salaryCalculator.test.ts   # 単一テストファイル実行
+npm test -w @rakushifu/core -- src/utils/salaryCalculator.test.ts   # 単一テストファイル実行
 ```
 
 デプロイは Vercel（`apps/web` で `npx vercel`）。Vercel の Root Directory は `apps/web`。
@@ -51,17 +53,17 @@ cookie はサーバーに保存せずフロントの sessionStorage のみで保
 2. `api/desired-shifts.ts` — 指定期間の提出済み希望シフト。
 3. `api/submit-shifts.ts` — 提出（upsert）。
 
-**upsert は期間を丸ごと置き換える。** 期間内の全日付を送る必要があり、希望を出さない日は `desired_schedule: null` を送る。日を落とすと、その日の提出済みの希望が消える。`toUpsertPayload`（`src/utils/shiftSubmit.ts`）がこの不変条件を担保しているので、ここを変えるときはテストを必ず見ること。
+**upsert は期間を丸ごと置き換える。** 期間内の全日付を送る必要があり、希望を出さない日は `desired_schedule: null` を送る。日を落とすと、その日の提出済みの希望が消える。`toUpsertPayload`（`packages/core/src/utils/shiftSubmit.ts`）がこの不変条件を担保しているので、ここを変えるときはテストを必ず見ること。
 
 **CSRF が必要。** らくしふの更新系は Rails の CSRF 保護下にあり、提出ページの HTML に埋め込まれた `data-csrf-token` を `X-CSRF-Token` で送る。トークンはセッションと対なので、`api/submit-shifts.ts` は「提出ページを GET → トークン抽出 → その GET で回転した `_Rakushifu_session` に差し替えて POST」する。既存の `api/` で唯一の更新系なので、`req.body` はそのまま中継せず、許可キーだけを検証して詰め替えている。
 
 **初期値を入れるのは未提出の期間だけ。** 公式は未提出の期間に限り、勤務可能時間帯（無ければ基本シフト）を店舗の入力可能範囲でクランプしたものを既定値として全日に入れる。提出済みの期間では空欄のままにする。ここを取り違えると、希望を出さないことにした日が出勤希望として復活する。
 
-ロジックは `src/utils/shiftSubmit.ts` に集約（`salaryCalculator.ts` と同じく UI から独立した純粋関数）。
+ロジックは `packages/core/src/utils/shiftSubmit.ts` に集約（`salaryCalculator.ts` と同じく UI から独立した純粋関数）。
 
 ### 給料計算ロジック
 
-`src/utils/salaryCalculator.ts` に集約。UIから独立した純粋関数（`salaryCalculator.test.ts`）。
+`packages/core/src/utils/salaryCalculator.ts` に集約。UIから独立した純粋関数（`salaryCalculator.test.ts`）。
 
 - 深夜割増は 22:00〜翌5:00 を x1.25。`calcLateNightMinutes` が日跨ぎシフト（例 22:00〜02:00）を含めて深夜該当分を分単位で算出する。ロジック変更時は日跨ぎ・深夜境界のケースを必ずテストで担保する。
 - `calcShiftDetail` が1シフトの通常/深夜時間を、`calcMonthlySalary` が月間合計と給料（通常給・深夜給・交通費）を計算する。給料は `Math.floor` で円未満切り捨て。
@@ -89,7 +91,7 @@ cookie はサーバーに保存せずフロントの sessionStorage のみで保
 - `pages/ShiftCalendar.tsx` — 月グリッド + 選択日の詳細 + `DayOverlap`（その日に同じ時間へ入る人）。かぶりは選択日に連動し、専用の日付入力は持たない。
 - `pages/Dashboard.tsx` — 月切り替え・設定・シフト表・給料サマリを束ねる。年月stateが変わると `useEffect` で再取得。
 - 時給・交通費の設定（`Settings`）はブラウザに保存。デフォルトは時給1200円・交通費0円。
-- 型は `src/types/shift.ts` に集約。らくしふAPIのレスポンス型（`ShiftApiResponse` 等）とアプリ内部型（`ShiftDetail`, `SalaryResult`）を分けている。
+- 型は `packages/core/src/types/shift.ts` に集約。らくしふAPIのレスポンス型（`ShiftApiResponse` 等）とアプリ内部型（`ShiftDetail`, `SalaryResult`）を分けている。
 
 ## 注意点
 
