@@ -8,7 +8,7 @@
     "android": "expo start --android",
     "build": "tsc --noEmit",
     "lint": "expo lint",
-    "doctor": "expo-doctor",
+    "doctor": "npx --yes expo-doctor@latest",
     "gen:theme": "node scripts/gen-theme.mjs"
   },
   "dependencies": {
