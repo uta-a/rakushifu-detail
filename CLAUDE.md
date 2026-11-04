@@ -8,21 +8,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## コマンド
 
+npm workspaces の monorepo。Web版は `apps/web`（`@rakushifu/web`）にある。ルートのスクリプトは各 workspace に委譲する。
+
 ```bash
 npm run dev          # Vite開発サーバー起動
 npm run build        # tsc -b で型チェック後、vite build
 npm run lint         # ESLint
 npm test             # Vitest（1回実行）
 npm run test:watch   # Vitest（watch）
-npx vitest run src/utils/salaryCalculator.test.ts   # 単一テストファイル実行
+npm test -w @rakushifu/web -- src/utils/salaryCalculator.test.ts   # 単一テストファイル実行
 ```
 
-デプロイは Vercel（`npx vercel`）。
+デプロイは Vercel（`apps/web` で `npx vercel`）。Vercel の Root Directory は `apps/web`。
 
 ローカルで API 込みの動作確認をするには、2つのプロセスを並行して起動する。
 
 ```bash
-npx vercel dev --listen 3001   # api/ の Serverless Functions（ポートは固定）
+cd apps/web && npx vercel dev --listen 3001   # api/ の Serverless Functions（ポートは固定）
 npm run dev                    # フロント。/api/* は 3001 にプロキシされる
 ```
 
