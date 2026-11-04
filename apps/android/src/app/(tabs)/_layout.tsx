@@ -33,8 +33,10 @@ export default function TabsLayout() {
         sceneStyle: { backgroundColor: colors.background },
       }}
     >
+      {/* カレンダーを / にする。未ログイン時に Stack.Protected が戻す先はログイン画面だけにし、
+          / ⇄ 保護されたルートのリダイレクトがループしないようにする */}
       <Tabs.Screen
-        name="calendar"
+        name="index"
         options={{ title: 'カレンダー', tabBarIcon: ({ color, size }) => <CalendarDays color={color} size={size} /> }}
       />
       <Tabs.Screen
