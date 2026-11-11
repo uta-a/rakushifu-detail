@@ -36,7 +36,15 @@
         }
       ],
       "expo-secure-store",
-      "expo-background-task"
+      "expo-background-task",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "extraProguardRules": "# WorkManager（expo-background-task）は WorkDatabase_Impl をリフレクションで作る。\n# Room 2.6 の keep ルールはクラスだけでコンストラクタを残さず、R8 の full mode で消されて起動時に落ちる\n-keep class * extends androidx.room.RoomDatabase { <init>(); }"
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
